@@ -104,6 +104,11 @@ function simularEscolha(valor) {
         const audioMatadora = new Audio(`../som/matadora.wav`);
         audioMatadora.play();
     }
+
+    function somCaputura(){
+        const audioCaptura = new Audio(`../som/captura.wav`);
+        audioCaptura.play();
+    }
     function posicionarPecasIniciais(grupoEscolhido) {
         if (grupoEscolhido === '1') {
             for (let i = 0; i < pecas.length; i++) {
@@ -221,76 +226,43 @@ function simularEscolha(valor) {
         }
     }
     
-    // Você pode chamar essa função quando quiser obter as posições da matadora e da impiedosa.
-    
-    function moverImpiedosa(linha, coluna) {
-        const indexImpiedosa = pecas.findIndex(peca => peca.grupo === 4);
 
-        // Verificar se o movimento é permitido
-        if (!podeMoverImpiedosa(linha, coluna)) {
-            return;
-        }
 
-        posicaoPecas[indexImpiedosa] = { linha: linha, coluna: coluna };
-        desenharTabuleiro();
-        console.log(`Peça impiedosa movida para linha ${linha}, coluna ${coluna}`);
-
-        // Adicionando impressão das diagonais
+    function podeMoverImpiedosa(linha, coluna) {
+        // Verificar se a nova posição está nas células diagonais
         const diagonais = calcularDiagonais(linha, coluna);
-        console.log("Linhas e colunas das células diagonais:");
-
-        diagonais.forEach(celula => {
-            console.log(`Linha: ${celula.linha}, Coluna: ${celula.coluna}`);
-
-            const indexDiagonal = posicaoPecas.findIndex(
-                peca => peca.linha === celula.linha && peca.coluna === celula.coluna
-            );
-
-            if (indexDiagonal === -1) {
-                // Adiciona peça do grupo 5 nas diagonais
-                posicaoPecas.push({ linha: celula.linha, coluna: celula.coluna });
-                pecas.push({ grupo: 5 });
-                console.log(`Peça do grupo 5 adicionada na linha ${celula.linha}, coluna ${celula.coluna}`);
-            }
-        });
-
-        falarMensagem(`Impiedosa movida para faixa ${linha} e trilha ${coluna}. Prossiga para captura.`);
-        somImpiedosa();
-        verificarECapturarMosqueteiro();
-
-        // Remover impiedosa após o primeiro movimento
-        if (!impiedosaColocada) {
-            const indexImpiedosa = posicaoPecas.findIndex(peca => peca.linha === linha && peca.coluna === coluna);
-            posicaoPecas.splice(indexImpiedosa, 1);
-            pecas.splice(indexImpiedosa, 1);
-            impiedosaColocada = true;
-            console.log("Impiedosa removida após o primeiro movimento.");
+        const novaPosicaoDiagonal = diagonais.some(celula => celula.linha === linha && celula.coluna === coluna);
+    
+        // Se a nova posição for uma célula diagonal, bloquear o movimento
+        if (novaPosicaoDiagonal) {
+            console.log("Movimento inválido: a Impiedosa não pode se mover para as células diagonais.");
+            return false;
         }
+    
+        // Verificar se a nova posição está ocupada por outra peça
+        const indexPosicaoOcupada = posicaoPecas.findIndex(
+            peca => peca.linha === linha && peca.coluna === coluna
+        );
+    
+        if (indexPosicaoOcupada !== -1) {
+            console.log("Movimento inválido: a célula já está ocupada.");
+            falarMensagem("Movimento negado!");
+
+            return false;
+        }
+    
+        // Verificar se a nova posição fecha um cerco
+        const cercoFechado = verificarCerco(linha, coluna);
+    
+        if (!cercoFechado) {
+            falarMensagem("Movimento negado!");
+
+            return false;
+        }
+    
+        return true; // Movimento permitido
     }
-
-function podeMoverImpiedosa(linha, coluna) {
-    // Verificar se a nova posição está nas células diagonais
-    const diagonais = calcularDiagonais(posicaoPecas[6].linha, posicaoPecas[6].coluna);
-    const novaPosicaoDiagonal = diagonais.some(celula => celula.linha === linha && celula.coluna === coluna);
-
-    // Se a nova posição for uma célula diagonal, bloquear o movimento
-    if (novaPosicaoDiagonal) {
-        console.log("Movimento inválido: a impiedosa não pode se mover para as células diagonais.");
-        return false;
-    }
-
-    // Verificar se a nova posição está ocupada por outra peça
-    const indexPosicaoOcupada = posicaoPecas.findIndex(
-        peca => peca.linha === linha && peca.coluna === coluna
-    );
-
-    if (indexPosicaoOcupada !== -1) {
-        console.log("Movimento inválido: a célula já está ocupada.");
-        return false;
-    }
-
-    return true; // Movimento permitido
-}
+    
 
 function moverImpiedosa(linha, coluna) {
     const indexImpiedosa = pecas.findIndex(peca => peca.grupo === 4);
@@ -349,6 +321,29 @@ function calcularDiagonais(linha, coluna) {
     return diagonais;
 }
 
+function verificarCerco(linha, coluna) {
+    const adjacencias = [
+        { linha: linha - 1, coluna: coluna },
+        { linha: linha + 1, coluna: coluna },
+        { linha: linha, coluna: coluna - 1 },
+        { linha: linha, coluna: coluna + 1 }
+    ];
+
+    // Contar o número de peças ao redor da nova posição
+    let contadorPecas = 0;
+
+    adjacencias.forEach(adjacente => {
+        const indexAdjacente = posicaoPecas.findIndex(
+            peca => peca.linha === adjacente.linha && peca.coluna === adjacente.coluna
+        );
+
+        if (indexAdjacente !== -1) {
+            contadorPecas++;
+        }
+    });
+
+    return contadorPecas >= 1;
+}
 
     
     function podeCapturar(linha, coluna) {
@@ -409,7 +404,8 @@ function calcularDiagonais(linha, coluna) {
                     somMatadora();
                     desenharTabuleiro();
                 } else {
-                    console.log("Movimento da matadora negado: a célula já está ocupada ou não resultará em cerco.");
+                    console.log("Movimento da matadora negado");
+                    falarMensagem("Movimento da matadora negado");
                 }
             }
         });
@@ -625,7 +621,7 @@ function calcularDiagonais(linha, coluna) {
 
             if (pecaOcupante.grupo === 3 && indexPosicaoOcupada === 6) {
                 falarMensagem("Posição ocupada pela matadora.");
-            } else {
+            } else if(pecaOcupante.grupo === 2) {
                 let numeroPeca;
                 if (pecaOcupante.grupo === 2) {
                     numeroPeca = indexPosicaoOcupada - 2;
@@ -634,7 +630,23 @@ function calcularDiagonais(linha, coluna) {
                 }
 
                 falarMensagem(`Posição ocupada pelo mosqueteiro ${numeroPeca} do computador.`);
+            } else if(pecaOcupante.grupo === 1){
+                let numeroPeca;
+                if (pecaOcupante.grupo === 1) {
+                    numeroPeca = indexPosicaoOcupada+1;
+                } else {
+                    numeroPeca = indexPosicaoOcupada+1;
+                }
+
+                falarMensagem(`Posição ocupada pelo mosqueteiro ${numeroPeca} do jogador.`);
+            }else if(pecaOcupante.grupo === 4 || pecaOcupante.grupo === 5){
+
+                falarMensagem(`Posição ocupada pela impiedosa.`);
+            }else{
+                falarMensagem("Movimento negado. Você não pode fugir do tabuleiro");
             }
+
+
             return;
         }
         if (
@@ -755,6 +767,7 @@ function movimentoComputador() {
         posicaoPecas.forEach((posicao, index) => {
             if (pecas[index].grupo === 1 || pecas[index].grupo === 2) {
                 if (estaCercado(posicao, index)) {
+                    somCaputura();
                     console.log(`Mosqueteiro na posição (linha ${posicao.linha}, coluna ${posicao.coluna}) foi capturado!`);
                     falarMensagem(`Mosqueteiro na posição (faixa ${posicao.linha}, trilha ${posicao.coluna}) foi capturado!`);
     
