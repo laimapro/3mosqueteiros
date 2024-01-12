@@ -229,16 +229,7 @@ function simularEscolha(valor) {
 
 
     function podeMoverImpiedosa(linha, coluna) {
-        // Verificar se a nova posição está nas células diagonais
-        const diagonais = calcularDiagonais(linha, coluna);
-        const novaPosicaoDiagonal = diagonais.some(celula => celula.linha === linha && celula.coluna === coluna);
-    
-        // Se a nova posição for uma célula diagonal, bloquear o movimento
-        if (novaPosicaoDiagonal) {
-            console.log("Movimento inválido: a Impiedosa não pode se mover para as células diagonais.");
-            return false;
-        }
-    
+     
         // Verificar se a nova posição está ocupada por outra peça
         const indexPosicaoOcupada = posicaoPecas.findIndex(
             peca => peca.linha === linha && peca.coluna === coluna
@@ -342,6 +333,12 @@ function verificarCerco(linha, coluna) {
         }
     });
 
+    // Se a Impiedosa está na borda e não fechou um cerco, retornar falso
+    if (linha === 1 || linha === linhas || coluna === 1 || coluna === colunas) {
+        return contadorPecas >= 2; // Dois vizinhos ou mais para cerco nas bordas
+    }
+
+    // Se não está na borda, um vizinho já fecha o cerco
     return contadorPecas >= 1;
 }
 
