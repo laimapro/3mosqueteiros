@@ -170,8 +170,6 @@ function simularEscolha(valor) {
             falarPosicoesPecasComputador();
         } else if (event.key === 'j' || event.key === 'J') {
             falarPosicoesPecasJogador();
-        } else if (event.key === 'e' || event.key === 'E') {
-            informarPosicaoMatadoraImpiedosa();
         } else if (event.key === 'i' || event.key === 'I') {
             aguardandoPosicaoImpiedosa = true;
             console.log("Digite a linha e depois a coluna para a peça impiedosa");
@@ -193,30 +191,6 @@ function simularEscolha(valor) {
             matadora = false;
         }
     });
-    
-    function informarPosicaoMatadoraImpiedosa() {
-        const indexMatadora = pecas.findIndex(peca => peca.grupo === 3);
-        const indexImpiedosa = pecas.findIndex(peca => peca.grupo === 4);
-    
-        if (indexMatadora !== -1) {
-            const posicaoMatadora = posicaoPecas[indexMatadora];
-            console.log(`Matadora está na faixa ${posicaoMatadora.linha}, trilha ${posicaoMatadora.coluna}.`);
-            falarMensagem(`Matadora está na faixa ${posicaoMatadora.linha}, trilha ${posicaoMatadora.coluna}.`);
-        }
-    
-        if (indexImpiedosa !== -1) {
-            const posicaoImpiedosa = posicaoPecas[indexImpiedosa];
-            console.log(`Impiedosa está na faixa ${posicaoImpiedosa.linha}, trilha ${posicaoImpiedosa.coluna}.`);
-            if(posicaoImpiedosa.linha === 0){
-                falarMensagem(`Impiedosa está escondida`);
-            }else{
-                falarMensagem(`Impiedosa está na faixa ${posicaoImpiedosa.linha}, trilha ${posicaoImpiedosa.coluna}.`);
-            }
-            
-        }
-    }
-    
-    // Você pode chamar essa função quando quiser obter as posições da matadora e da impiedosa.
     
     function moverImpiedosa(linha, coluna) {
         const indexImpiedosa = pecas.findIndex(peca => peca.grupo === 4);
@@ -261,6 +235,7 @@ function simularEscolha(valor) {
             impiedosaColocada = true;
             console.log("Impiedosa removida após o primeiro movimento.");
         }
+        verificarECapturarMosqueteiro();
     }
 
 function podeMoverImpiedosa(linha, coluna) {
@@ -285,6 +260,7 @@ function podeMoverImpiedosa(linha, coluna) {
     }
 
     return true; // Movimento permitido
+    verificarECapturarMosqueteiro();
 }
 
 function moverImpiedosa(linha, coluna) {
@@ -411,28 +387,6 @@ function calcularDiagonais(linha, coluna) {
         verificarECapturarMosqueteiro();
     }
     
-    // ... (código existente)
-
-function moverImpiedosaParaPosicaoInicial() {
-    const indexImpiedosa = pecas.findIndex(peca => peca.grupo === 4);
-    if (indexImpiedosa !== -1) {
-        posicaoPecas[indexImpiedosa] = { linha: -1, coluna: -1 };
-        desenharTabuleiro();
-        console.log("Impiedosa movida para posição inicial (-1, -1).");
-    }
-}
-
-function removerPecaDoTabuleiro(index) {
-    if (index !== undefined) {
-        posicaoPecas[index] = { linha: -1, coluna: -1 };
-        desenharTabuleiro();
-        console.log(`Peça na posição (linha -1, coluna -1) removida.`);
-        moverImpiedosaParaPosicaoInicial();
-    }
-}
-
-
-
     function vaiCercar(linha, coluna) {
         // Verifica se colocar a matadora na posição especificada cercará um mosqueteiro adversário
         const direcoes = [[1, 0], [0, 1], [-1, 0], [0, -1]]; // baixo, direita, cima, esquerda
@@ -491,7 +445,7 @@ function removerPecaDoTabuleiro(index) {
         let mensagem = "";
         posicaoPecas.forEach((peca, index) => {
             if (pecas[index] && pecas[index].grupo === 2) {
-                const numeroMosqueteiro = index - Math.floor(pecas.length / 2) + 4;
+                const numeroMosqueteiro = index - Math.floor(pecas.length / 2) + 2;
                 mensagem += `Mosqueteiro ${numeroMosqueteiro} está na faixa ${peca.linha}, trilha ${peca.coluna}. `;
             }
         });
@@ -563,6 +517,7 @@ function removerPecaDoTabuleiro(index) {
                 ctx.fillText(numeroTexto, xPeca, yPeca);
             }
         }
+        verificarECapturarMosqueteiro();
     }
     
     
@@ -770,47 +725,21 @@ function movimentoComputador() {
         posicaoPecas.forEach((posicao, index) => {
             if (pecas[index].grupo === 1 || pecas[index].grupo === 2) {
                 if (estaCercado(posicao, index)) {
-                    console.log(`Mosqueteiro na posição (linha ${posicao.linha}, coluna ${posicao.coluna}) foi capturado!`);
-                    falarMensagem(`Mosqueteiro na posição (faixa ${posicao.linha}, trilha ${posicao.coluna}) foi capturado!`)
+                    console.log(`Mosqueteiro na posição (linha ${posicao.linha},  coluna ${posicao.coluna}) foi capturado!`);
+                    falarMensagem(`Mosqueteiro na posição (faixa ${posicao.linha},  trilha ${posicao.coluna}) foi capturado!`)
                     removerPecaDoTabuleiro(index);
-                }
+
     
-                if (podeLiberarMatadora(posicao, index)) {
-                    // Se o mosqueteiro estiver cercado por três lados, libere o movimento da matadora
-                    console.log(`Mosqueteiro na posição (linha ${posicao.linha}, coluna ${posicao.coluna}) está cercado por três lados. Movimento da matadora liberado!`);
-                    falarMensagem(`Mosqueteiro na posição (faixa ${posicao.linha}, trilha ${posicao.coluna}) está cercado por três lados. Movimento da matadora liberado!`);
-                    matadora = true;
+                    for (let i = posicaoPecas.length - 1; i >= 0; i--) {
+                        if (pecas[i].grupo === 5 || pecas[i].grupo === 4) {
+                            // Mova a peça para fora do tabuleiro
+                            posicaoPecas[i] = { linha: -1, coluna: -1 };
+                        }
+                    }
                 }
             }
         });
-        
     }
-    
-    function podeLiberarMatadora(posicao, indexMosqueteiro) {
-        const direcoes = [[1, 0], [0, 1], [-1, 0], [0, -1]]; // baixo, direita, cima, esquerda
-        let ladosOpostos = 0;
-    
-        for (let [dx, dy] of direcoes) {
-            const linhaAdjacente = posicao.linha + dx;
-            const colunaAdjacente = posicao.coluna + dy;
-    
-            const indexPecaAdjacente = posicaoPecas.findIndex(
-                peca => peca.linha === linhaAdjacente && peca.coluna === colunaAdjacente
-            );
-    
-            if (indexPecaAdjacente !== -1 && (pecas[indexPecaAdjacente].grupo === 1 || pecas[indexPecaAdjacente].grupo === 2)) {
-                // Verifica se a peça adjacente é um mosqueteiro adversário
-                const posicaoPecaAdjacente = posicaoPecas[indexPecaAdjacente];
-                if (!estaCercado(posicaoPecaAdjacente, indexPecaAdjacente)) {
-                    ladosOpostos++;
-                }
-            }
-        }
-    
-        // Se o mosqueteiro estiver cercado por três lados, libera o movimento da matadora
-        return ladosOpostos === 3;
-    }
-    
     
     function estaCercado(posicao, indexPeca) {
         const direcoes = [[1, 0], [0, 1], [-1, 0], [0, -1]]; // Representa as quatro direções: baixo, direita, cima, esquerda
