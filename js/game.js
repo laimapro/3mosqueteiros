@@ -137,7 +137,8 @@ function simularEscolha(valor) {
     
     
     
-    
+    var contaminjogador = 0;
+    var contamincomput= 0;
     
     
     let vozAtivada = true;
@@ -238,14 +239,14 @@ function simularEscolha(valor) {
         const indexPosicaoOcupada = posicaoPecas.findIndex(
             peca => peca.linha === linha && peca.coluna === coluna
         );
-    
-        if (indexPosicaoOcupada !== -1) {
-            console.log("Movimento inválido: a célula já está ocupada.");
-            falarMensagem("Movimento negado!");
+       
+            if (indexPosicaoOcupada !== -1) {
+                console.log("Movimento inválido: a célula já está ocupada.");
+                falarMensagem("Movimento negado!");
 
-            return false;
-        }
-    
+                return false;
+            }
+        
         // Verificar se a nova posição fecha um cerco
         const cercoFechado = verificarCerco(linha, coluna);
     
@@ -254,50 +255,73 @@ function simularEscolha(valor) {
 
             return false;
         }
-    
-        return true; // Movimento permitido
+        if(contaminjogador > 4){
+            return true; // Movimento permitido
+         }
     }
     
-
-function moverImpiedosa(linha, coluna) {
-    const indexImpiedosa = pecas.findIndex(peca => peca.grupo === 4);
-
-    // Verificar se o movimento é permitido
-    if (!podeMoverImpiedosa(linha, coluna)) {
-        return;
-    }
-
-    posicaoPecas[indexImpiedosa] = { linha: linha, coluna: coluna };
-    desenharTabuleiro();
-    console.log(`Peça impiedosa movida para linha ${linha}, coluna ${coluna}`);
-
-    // Adicionando impressão das diagonais
-    const diagonais = calcularDiagonais(linha, coluna);
-    console.log("Linhas e colunas das células diagonais:");
-
-    diagonais.forEach(celula => {
-        console.log(`Linha: ${celula.linha}, Coluna: ${celula.coluna}`);
-        
-        const indexDiagonal = posicaoPecas.findIndex(
-            peca => peca.linha === celula.linha && peca.coluna === celula.coluna
-        );
-
-        if (indexDiagonal === -1) {
-            // Adiciona peça do grupo 5 nas diagonais
-            posicaoPecas.push({ linha: celula.linha, coluna: celula.coluna });
-            pecas.push({ grupo: 5 });
-            console.log(`Peça do grupo 5 adicionada na linha ${celula.linha}, coluna ${celula.coluna}`);
+    function mostrarPecasProximas(linha, coluna) {
+        console.log(`-------------------------------------Peças próximas à Impiedosa na posição solicitada (${linha}, ${coluna}):`);
+    
+        for (let i = linha - 2; i <= linha + 2; i++) {
+            for (let j = coluna - 2; j <= coluna + 2; j++) {
+                const indexPeca = posicaoPecas.findIndex(
+                    peca => peca.linha === i && peca.coluna === j
+                );
+    
+                if (indexPeca !== -1) {
+                    const grupoPeca = pecas[indexPeca].grupo;
+                    console.log(`Grupo ${grupoPeca} na linha ${i}, coluna ${j}`);
+                }
+            }
         }
-    });
-
-    falarMensagem(`Impiedosa movida para faixa ${linha} e trilha ${coluna}. Prossiga para captura.`);
-    somImpiedosa();
-
-    verificarECapturarMosqueteiro();
-    
+    }
     
 
-}
+    function moverImpiedosa(linha, coluna) {
+        const indexImpiedosa = pecas.findIndex(peca => peca.grupo === 4);
+    
+        // Mostrar as peças próximas antes de mover a Impiedosa
+        mostrarPecasProximas(linha, coluna);
+    
+        // Verificar se o movimento é permitido
+      
+            if (!podeMoverImpiedosa(linha, coluna) ) {
+                return;
+                
+            }
+        
+        
+        posicaoPecas[indexImpiedosa] = { linha: linha, coluna: coluna };
+        desenharTabuleiro();
+        console.log(`Peça impiedosa movida para linha ${linha}, coluna ${coluna}`);
+    
+        // Adicionando impressão das diagonais
+        const diagonais = calcularDiagonais(linha, coluna);
+        console.log("Linhas e colunas das células diagonais:");
+    
+        diagonais.forEach(celula => {
+            console.log(`Linha: ${celula.linha}, Coluna: ${celula.coluna}`);
+    
+            const indexDiagonal = posicaoPecas.findIndex(
+                peca => peca.linha === celula.linha && peca.coluna === celula.coluna
+            );
+    
+            if (indexDiagonal === -1) {
+                // Adiciona peça do grupo 5 nas diagonais
+                posicaoPecas.push({ linha: celula.linha, coluna: celula.coluna });
+                pecas.push({ grupo: 5 });
+                console.log(`Peça do grupo 5 adicionada na linha ${celula.linha}, coluna ${celula.coluna}`);
+            }
+        });
+    
+        falarMensagem(`Impiedosa movida para faixa ${linha} e trilha ${coluna}. Prossiga para captura.`);
+        somImpiedosa();
+        mostrarPecasProximas(linha, coluna);
+        
+    } 
+    
+    
 
 
 function calcularDiagonais(linha, coluna) {
@@ -682,10 +706,13 @@ function verificarCerco(linha, coluna) {
                 desenharTabuleiro();
 
                 if(grupoAtual === 1){
+                    contaminjogador +=1;
                     falarMensagem(`Você moveu mosqueteiro ${pecaSelecionada}  para faixa ${novaLinha}, trilha ${novaColuna}`);
-                    console.log(`Jogador moveu Linha ${novaLinha}, Coluna ${novaColuna}`)
+                    console.log(`Jogador moveu Linha ${novaLinha}, Coluna ${novaColuna}`);
+                    console.log(contamincomput);
                 }
                 else{
+                    contamincomput +=1;
                     falarMensagem(`Computador escolheu mosqueteiro ${pecaSelecionada -3} e  moveu para faixa ${posicaoPecas[indexPeca].linha}, trilha ${posicaoPecas[indexPeca].coluna}.`);
                     console.log(`Computador moveu para Linha ${posicaoPecas[indexPeca].linha}, Coluna ${posicaoPecas[indexPeca].coluna}.`)
                 }
@@ -771,13 +798,19 @@ function movimentoComputador() {
                     somCaputura();
                     console.log(`Mosqueteiro na posição (linha ${posicao.linha}, coluna ${posicao.coluna}) foi capturado!`);
                     falarMensagem(`Mosqueteiro na posição (faixa ${posicao.linha}, trilha ${posicao.coluna}) foi capturado!`);
-    
+                    
                     const remocaoBemSucedida = removerPecaDoTabuleiro(index);
 
                     // Verifique se a remoção foi bem-sucedida
                     if (remocaoBemSucedida) {
                         console.log(`A peça foi removida com sucesso!`);
                         retiradaImpiedosa([4,5]);
+                        if(grupoAtual === 1){
+                            grupoAtual = 2;
+                            movimentoComputador();
+                        }else{
+                            grupoAtual = 1;
+                        }
                     } else {
                         console.log(`Falha ao remover a peça!`);
                     }

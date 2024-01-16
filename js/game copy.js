@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     
+
+    
 Swal.fire({
     
     title: 'Escolha posição do tabuleiro',
@@ -77,6 +79,7 @@ function simularEscolha(valor) {
     let matadora = false;
 
     let impiedosaColocada = false;
+
 
 
     function falarMensagem(mensagem) {
@@ -213,10 +216,11 @@ function simularEscolha(valor) {
             const posicaoImpiedosa = posicaoPecas[indexImpiedosa];
             console.log(`Impiedosa está na faixa ${posicaoImpiedosa.linha}, trilha ${posicaoImpiedosa.coluna}.`);
             if(posicaoImpiedosa.linha === 0){
-                falarMensagem('Impiedosa  está à espera de capturar');
+                falarMensagem('Impiedosa só está esperando você para capturar');
 
             }else if(posicaoImpiedosa.linha === -1){
-                falarMensagem('Impiedosa está  à espera de capturar');
+                falarMensagem('Impiedosa só está esperando você para capturar');
+                
 
 
             }else{
