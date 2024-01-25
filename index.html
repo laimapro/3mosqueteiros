@@ -20,22 +20,25 @@
     <script>
         let synth = window.speechSynthesis;
         let utterance;
-
+    
         function lerTextoCompletoERedirecionar() {
             let texto = document.body.innerText || document.body.textContent;
             utterance = new SpeechSynthesisUtterance(texto);
-
+    
             // Ajustando a velocidade de leitura
             utterance.rate = 1.8; // Velocidade estabelecida em 1.8
-
+    
+            // Definindo o idioma para inglês britânico
+            utterance.lang = 'en-GB';
+    
             // Evento de término da leitura
             utterance.onend = function(event) {
                 window.location.href = 'pages/game.html'; // Redireciona para game.html
             };
-
+    
             synth.speak(utterance);
         }
-
+    
         // Interrompendo a leitura ao pressionar Escape e redirecionando
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
@@ -45,9 +48,10 @@
                 window.location.href = 'pages/game.html'; // Redireciona para game.html
             }
         });
-
+    
         // Executa a função de leitura quando a página é carregada
         window.onload = lerTextoCompletoERedirecionar;
     </script>
+    
 </body>
 </html>

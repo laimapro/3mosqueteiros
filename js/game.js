@@ -1,10 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     document.addEventListener('keydown', (event) => {
-        if (event.key === 'i' || event.key === 'I') {
-            simularEscolha('1');
+        if (event.key === 'b' || event.key === 'B') {
+            chooseBoardPosition('1');
         } else if (event.key === 't' || event.key === 'T') {
-            simularEscolha('2');
+            chooseBoardPosition('2');
         }
     });
 
@@ -19,7 +19,7 @@ Swal.fire({
         '1': 'Bottom',
         '2': 'Top',
     },
-    inputPlaceholder: 'start with the musketeers on the',
+    inputPlaceholder: 'start  game with the musketeers on the',
     showCancelButton: true,
     confirmButtonText: 'Start Game',
     cancelButtonText: 'Cancel',
@@ -34,61 +34,61 @@ Swal.fire({
     },
 }).then((result) => {
     if (result.isConfirmed) {
-        simularEscolha(result.value);
-        posicionarPecasIniciais(result.value);
-        falarMensagem("Your turn, choose a musketeer");
+        chooseBoardPosition(result.value);
+        placepiecesatStart(result.value);
+        speakMessage("Your turn, choose a musketeer");
     }
 });
 
-function simularEscolha(valor) {
-    console.log(`Simulando escolha: ${valor}`);
+function chooseBoardPosition(valor) {
+    console.log(`choose board Position: ${valor}`);
 }
 
 
 
     const canvas = document.getElementById('tabuleiro');
     const ctx = canvas.getContext('2d');
-    const tamanhoCelula = 50;
-    const linhas = 7;
-    const colunas = 7;
-    const tabuleiro = Array.from({ length: linhas + 1 }, () => Array(colunas + 1).fill(0));
-    const gruposDePecas = { 1: 'blue', 2: 'green', 3: 'purple',  4: 'red', 5: 'yellow'}; 
+    const cellSize = 50;
+    const rows = 7;
+    const columns = 7;
+    const board = Array.from({ length: rows + 1 }, () => Array(columns + 1).fill(0));
+    const groupPieces = { 1: 'blue', 2: 'green', 3: 'purple',  4: 'red', 5: 'yellow'}; 
 
 
    
-    const pecas = [
-        { grupo: 1 }, { grupo: 1 }, { grupo: 1 }, //jogador
-        { grupo: 2 }, { grupo: 2 }, { grupo: 2 }, //computador
-        { grupo: 3 }, //matadora
-        { grupo: 4 }, //impiedosa
-        { grupo: 5 }, { grupo: 5 }, { grupo: 5 },{ grupo: 5 },
+    const pieces = [
+        { group: 1 }, { group: 1 }, { group: 1 }, //jogador
+        { group: 2 }, { group: 2 }, { group: 2 }, //computador
+        { group: 3 }, //killerGirl
+        { group: 4 }, //impiedosa
+        { group: 5 }, { group: 5 }, { group: 5 },{ group: 5 },
     ];
     
-    let posicaoPecas = [
-        { linha: 1, coluna: 1 }, { linha: 2, coluna: 1 }, { linha: 3, coluna: 1 },
-        { linha: 4, coluna: 1 }, { linha: 5, coluna: 1 }, { linha: 6, coluna: 1 },
-        { linha: 4, coluna: 4 }, // Posição inicial da matadora
-        { linha: 0, coluna: 0 }, //impiedosa 2 2 
-        {linha: 0, coluna:0},{linha: 0, coluna:0},{linha: 0, coluna:0},{linha: 0, coluna:0},
+    let positionPieces = [
+        { row: 1, column: 1 }, { row: 2, column: 1 }, { row: 3, column: 1 },
+        { row: 4, column: 1 }, { row: 5, column: 1 }, { row: 6, column: 1 },
+        { row: 4, column: 4 }, // Posição inicial da killerGirl
+        { row: 0, column: 0 }, //impiedosa 2 2 
+        {row: 0, column:0},{row: 0, column:0},{row: 0, column:0},{row: 0, column:0},
     ];
     
-    let grupoAtual = 1; 
-    let movimentoRealizado = false; 
-    let pecaSelecionada = 1;
+    let currentgroup = 1; 
+    let movementExecuted = false; 
+    let pieceSelected = 1;
     let utterance;
-    let matadora = false;
+    let killerGirl = false;
 
-    let impiedosaColocada = false;
+    let ruthlessLadyPlaced = false;
 
 
 
-    function falarMensagem(mensagem) {
-        if (vozAtivada) {
+    function speakMessage(message) {
+        if (VoiceActivated) {
             if (utterance && typeof utterance.cancel === 'function') {
                 utterance.cancel();
             }
     
-            utterance = new SpeechSynthesisUtterance(mensagem);
+            utterance = new SpeechSynthesisUtterance(message);
     
             // Defina o idioma para inglês britânico
             utterance.lang = 'en-GB';
@@ -97,74 +97,74 @@ function simularEscolha(valor) {
         }
     }
     
-    function reproduzirSom(moveNumber) {
+    function playSound(moveNumber) {
         const audio = new Audio(`../som/move${moveNumber}.wav`);
         audio.play();
     }
 
-    function somImpiedosa(){
+    function soundRuthless(){
         const audioImpiedosa = new Audio(`../som/impiedosa.wav`);
         audioImpiedosa.play();
     }
 
-    function somMatadora(){
+    function soundKillerGirl(){
         const audioMatadora = new Audio(`../som/matadora.wav`);
         audioMatadora.play();
     }
 
-    function somCaputura(){
+    function SoundCapture(){
         const audioCaptura = new Audio(`../som/captura.wav`);
         audioCaptura.play();
     }
-    function posicionarPecasIniciais(grupoEscolhido) {
-        if (grupoEscolhido === '1') {
-            for (let i = 0; i < pecas.length; i++) {
-                if (pecas[i].grupo === 1) {
-                    posicaoPecas[i] = { linha: 7, coluna: i + 3 };
-                } else if (pecas[i].grupo === 2) {
-                    posicaoPecas[i] = { linha: 1, coluna: (i % 3) + 3 };
+    function placepiecesatStart(groupChosen) {
+        if (groupChosen === '1') {
+            for (let i = 0; i < pieces.length; i++) {
+                if (pieces[i].group === 1) {
+                    positionPieces[i] = { row: 7, column: i + 3 };
+                } else if (pieces[i].group === 2) {
+                    positionPieces[i] = { row: 1, column: (i % 3) + 3 };
                 }
             }
-        } else if (grupoEscolhido === '2') {
-            for (let i = 0; i < pecas.length; i++) {
-                if (pecas[i].grupo === 1) {
-                    posicaoPecas[i] = { linha: 1, coluna: (i % 3) + 3 };
-                } else if (pecas[i].grupo === 2) {
-                    posicaoPecas[i] = { linha: 7, coluna: (i % 3) + 3 };
+        } else if (groupChosen === '2') {
+            for (let i = 0; i < pieces.length; i++) {
+                if (pieces[i].group === 1) {
+                    positionPieces[i] = { row: 1, column: (i % 3) + 3 };
+                } else if (pieces[i].group === 2) {
+                    positionPieces[i] = { row: 7, column: (i % 3) + 3 };
                 }
             }
         }
-        falarMensagem("Press 's' to turn off the voice and 's' to turn it back on.")
-        desenharTabuleiro();
+        speakMessage("Press 's' to turn off the voice and 's' to turn it back on.")
+        drawBoard();
     }
     
     
     
     
-    var contaminjogador = 0;
-    var contamincomput= 0;
+    var minimumplayeraccount = 0;
+    var minimumcomputeraccount= 0;
     
     
-    let vozAtivada = true;
+    let VoiceActivated = true;
 
 
-    if( vozAtivada == true){
-        falarMensagem("Choose board position. Press T to start with the musketeers at the top of the screen. Press I to start with the musketeers at the bottom. Then press enter to play");
+    if( VoiceActivated == true){
+        speakMessage("Choose board position. Press T to start game with the musketeers at the top of the screen. Press B to start game with the musketeers at the bottom. Then press enter to play");
     }
 
-    let aguardandoPosicaoImpiedosa = false;
-    let posicaoImpiedosaLinha = null;
+    let awaitingruthlessLadyPosition = false;
+    let positionRuthlessLine = null;
     document.addEventListener('keydown', (event) => {
-        if (aguardandoPosicaoImpiedosa) {
+        if (awaitingruthlessLadyPosition) {
             if (!isNaN(parseInt(event.key, 10))) {
                 const num = parseInt(event.key, 10);
-                if (posicaoImpiedosaLinha === null) {
-                    posicaoImpiedosaLinha = num;
-                    console.log(`Linha escolhida: ${num}. Agora digite a coluna.`);
+                if (positionRuthlessLine === null) {
+                    positionRuthlessLine = num;
+                    console.log(`chosen row: ${num}. Now type the column.`);
                 } else {
-                    moverImpiedosa(posicaoImpiedosaLinha, num);
-                    aguardandoPosicaoImpiedosa = false;
-                    posicaoImpiedosaLinha = null;
+                    moveRuthlessLady(positionRuthlessLine, num);
+                    awaitingruthlessLadyPosition = false;
+                    positionRuthlessLine = null;
                 }
             }
             return; 
@@ -173,63 +173,63 @@ function simularEscolha(valor) {
         speechSynthesis.cancel();
         utterance = null;
 
-        if (event.key.startsWith('Arrow') && !movimentoRealizado) {
-            movePeca(event.key);
+        if (event.key.startsWith('Arrow') && !movementExecuted) {
+            movePiece(event.key);
         } else if (event.key >= '1' && event.key <= '3') {
-            pecaSelecionada = parseInt(event.key, 10);
-            console.log(`Peça ${pecaSelecionada} selecionada.`);
-            falarMensagem(`You chose musketeer ${pecaSelecionada}`);
+            pieceSelected = parseInt(event.key, 10);
+            console.log(`${pieceSelected} piece selected.`);
+            speakMessage(`You chose musketeer ${pieceSelected}`);
         } else if (event.key === 'c' || event.key === 'C') {
-            falarPosicoesPecasComputador();
-        } else if (event.key === 'j' || event.key === 'J') {
-            falarPosicoesPecasJogador();
+            talkPositionsPartsComputer();
+        } else if (event.key === 'p' || event.key === 'P') {
+            talkPositionsPecasPlayer();
         } else if (event.key === 'e' || event.key === 'E') {
-            informarPosicaoMatadoraImpiedosa();
-        } else if (event.key === 'i' || event.key === 'I') {
-            aguardandoPosicaoImpiedosa = true;
-            console.log("Digite a linha e depois a coluna para a peça impiedosa");
-            falarMensagem("Enter a number for the stripe and for the track to position the ruthless lady ")
+            informRuthlessLadyAndKillerGirlPosition();
+        } else if (event.key === 'r' || event.key === 'R') {
+            awaitingruthlessLadyPosition = true;
+            console.log("Digite a row e depois a column para a peça impiedosa");
+            speakMessage("Enter a number for the strip and for the track to position the ruthless lady ")
         } else if (event.key === 's' || event.key === 'S') {
-            if (vozAtivada) {
-                vozAtivada = false;
+            if (VoiceActivated) {
+                VoiceActivated = false;
             } else {
-                vozAtivada = true;
-                falarMensagem("Voice activated. Press 's' again to deactivate it.");
+                VoiceActivated = true;
+                speakMessage("Voice activated. Press 's' again to deactivate it.");
             }
-        } else if (event.key === 'm' || event.key === 'M') {
-            matadora = true;
-            falarMensagem("You have selected the killer girl. proceed with the capture.");
+        } else if (event.key === 'k' || event.key === 'K') {
+            killerGirl = true;
+            speakMessage("You have selected the killer girl. proceed with the capture.");
         }
 
-        if (matadora && event.key.startsWith('Arrow')) {
-            movimentoMatadora(event.key);
-            matadora = false;
+        if (killerGirl && event.key.startsWith('Arrow')) {
+            movimentKillerGirl(event.key);
+            killerGirl = false;
         }
     });
     
-    function informarPosicaoMatadoraImpiedosa() {
-        const indexMatadora = pecas.findIndex(peca => peca.grupo === 3);
-        const indexImpiedosa = pecas.findIndex(peca => peca.grupo === 4);
+    function informRuthlessLadyAndKillerGirlPosition() {
+        const indexkillergirl = pieces.findIndex(piece => piece.group === 3);
+        const indexRuthless = pieces.findIndex(piece => piece.group === 4);
     
-        if (indexMatadora !== -1) {
-            const posicaoMatadora = posicaoPecas[indexMatadora];
-            console.log(`Matadora está na faixa ${posicaoMatadora.linha}, trilha ${posicaoMatadora.coluna}.`);
-            falarMensagem(`Killer girls is on stripe ${posicaoMatadora.linha}, track ${posicaoMatadora.coluna}.`);
+        if (indexkillergirl !== -1) {
+            const posicaoMatadora = positionPieces[indexkillergirl];
+            console.log(`Killer girls is on strip ${posicaoMatadora.row}, track ${posicaoMatadora.column}.`);
+            speakMessage(`Killer girls is on strip ${posicaoMatadora.row}, track ${posicaoMatadora.column}.`);
         }
     
-        if (indexImpiedosa !== -1) {
-            const posicaoImpiedosa = posicaoPecas[indexImpiedosa];
-            console.log(`The ruthless lady is on stripe ${posicaoImpiedosa.linha}, track ${posicaoImpiedosa.coluna}.`);
-            if(posicaoImpiedosa.linha === 0){
-                falarMensagem('The ruthless lady is just waiting for you to capture');
+        if (indexRuthless !== -1) {
+            const ruthlessLadyposition = positionPieces[indexRuthless];
+            console.log(`The ruthless lady is on strip ${ruthlessLadyposition.row}, track ${ruthlessLadyposition.column}.`);
+            if(ruthlessLadyposition.row === 0){
+                speakMessage('The ruthless lady is just waiting for you to capture');
 
-            }else if(posicaoImpiedosa.linha === -1){
-                falarMensagem('The ruthless lady is just waiting for you to capture');
+            }else if(ruthlessLadyposition.row === -1){
+                speakMessage('The ruthless lady is just waiting for you to capture');
                 
 
 
             }else{
-                falarMensagem(`The ruthless lady is on stripe ${posicaoImpiedosa.linha}, track ${posicaoImpiedosa.coluna}.`);
+                speakMessage(`The ruthless lady is on strip ${ruthlessLadyposition.row}, track ${ruthlessLadyposition.column}.`);
             }
             
         }
@@ -237,249 +237,208 @@ function simularEscolha(valor) {
     
 
 
-    function podeMoverImpiedosa(linha, coluna) {
+    function canMoveruthless(row, column) {
      
         // Verificar se a nova posição está ocupada por outra peça
-        const indexPosicaoOcupada = posicaoPecas.findIndex(
-            peca => peca.linha === linha && peca.coluna === coluna
+        const indexOccupiedPosition = positionPieces.findIndex(
+            piece => piece.row === row && piece.column === column
         );
        
-            if (indexPosicaoOcupada !== -1) {
-                console.log("Movimento inválido: a célula já está ocupada.");
-                falarMensagem("Movement denied!");
+            if (indexOccupiedPosition !== -1) {
+                console.log("Invalid movement: cell is already occupied.");
+                speakMessage("Movement denied!");
 
                 return false;
             }
         
-        // Verificar se a nova posição fecha um cerco
-        const cercoFechado = verificarCerco(linha, coluna);
+        const siegeClosed = checksiege(row, column);
     
-        if (!cercoFechado) {
-            falarMensagem("Movement denied!");
+        if (!siegeClosed) {
+            speakMessage("Movement denied!");
 
             return false;
         }
-        if(contaminjogador > 4){
-            return true; // Movimento permitido
+        if(minimumplayeraccount > 4){
+            return true; 
          }
     }
     
-    function mostrarPecasProximas(linha, coluna) {
-        console.log(`-------------------------------------Peças próximas à Impiedosa na posição solicitada (${linha}, ${coluna}):`);
+    function showPlacesNext(row, column) {
+        console.log(`-------------------------------------Pieces close to Merciless in the requested position (${row}, ${column}):`);
     
-        for (let i = linha - 2; i <= linha + 2; i++) {
-            for (let j = coluna - 2; j <= coluna + 2; j++) {
-                const indexPeca = posicaoPecas.findIndex(
-                    peca => peca.linha === i && peca.coluna === j
+        for (let i = row - 2; i <= row + 2; i++) {
+            for (let j = column - 2; j <= column + 2; j++) {
+                const indexPiece = positionPieces.findIndex(
+                    piece => piece.row === i && piece.column === j
                 );
     
-                if (indexPeca !== -1) {
-                    const grupoPeca = pecas[indexPeca].grupo;
-                    console.log(`Grupo ${grupoPeca} na linha ${i}, coluna ${j}`);
+                if (indexPiece !== -1) {
+                    const grupoPeca = pieces[indexPiece].group;
+                    console.log(`group ${grupoPeca} na row ${i}, column ${j}`);
                 }
             }
         }
     }
     
 
-    function moverImpiedosa(linha, coluna) {
-        const indexImpiedosa = pecas.findIndex(peca => peca.grupo === 4);
+    function moveRuthlessLady(row, column) {
+        const indexRuthless = pieces.findIndex(piece => piece.group === 4);
     
-        // Mostrar as peças próximas antes de mover a Impiedosa
-        mostrarPecasProximas(linha, coluna);
+        showPlacesNext(row, column);
     
-        // Verificar se o movimento é permitido
       
-            if (!podeMoverImpiedosa(linha, coluna) ) {
+            if (!canMoveruthless(row, column) ) {
                 return;
                 
             }
         
         
-        posicaoPecas[indexImpiedosa] = { linha: linha, coluna: coluna };
-        desenharTabuleiro();
-        console.log(`Peça impiedosa movida para linha ${linha}, coluna ${coluna}`);
+        positionPieces[indexRuthless] = { row: row, column: column };
+        drawBoard();
     
-        // Adicionando impressão das diagonais
-        const diagonais = calcularDiagonais(linha, coluna);
-        console.log("Linhas e colunas das células diagonais:");
+        const diagonals = calculateDiagonals(row, column);
     
-        diagonais.forEach(celula => {
-            console.log(`Linha: ${celula.linha}, Coluna: ${celula.coluna}`);
+        diagonals.forEach(celula => {
+            console.log(`row: ${celula.row}, column: ${celula.column}`);
     
-            const indexDiagonal = posicaoPecas.findIndex(
-                peca => peca.linha === celula.linha && peca.coluna === celula.coluna
+            const indexDiagonal = positionPieces.findIndex(
+                piece => piece.row === celula.row && piece.column === celula.column
             );
     
             if (indexDiagonal === -1) {
-                // Adiciona peça do grupo 5 nas diagonais
-                posicaoPecas.push({ linha: celula.linha, coluna: celula.coluna });
-                pecas.push({ grupo: 5 });
-                console.log(`Peça do grupo 5 adicionada na linha ${celula.linha}, coluna ${celula.coluna}`);
+                positionPieces.push({ row: celula.row, column: celula.column });
+                pieces.push({ group: 5 });
             }
         });
     
-        falarMensagem(`the ruthless lady movies to stripe ${linha} and track ${coluna}. Procreed to capture.`);
-        somImpiedosa();
-        mostrarPecasProximas(linha, coluna);
+        speakMessage(`the ruthless lady movies to strip ${row} and track ${column}. Procreed to capture.`);
+        soundRuthless();
+        showPlacesNext(row, column);
         
     } 
     
     
 
 
-function calcularDiagonais(linha, coluna) {
-    const diagonais = [];
-    const direcoes = [[1, 1], [1, -1], [-1, 1], [-1, -1]]; // diagonais superiores e inferiores
+function calculateDiagonals(row, column) {
+    const diagonals = [];
+    const directions = [[1, 1], [1, -1], [-1, 1], [-1, -1]]; // upper and lower diagonals
 
-    direcoes.forEach(([dx, dy]) => {
-        let linhaAtual = linha + dx;
-        let colunaAtual = coluna + dy;
+    directions.forEach(([dx, dy]) => {
+        let currentline = row + dx;
+        let currentcolumn = column + dy;
 
-        if (linhaAtual >= 1 && linhaAtual <= linhas && colunaAtual >= 1 && colunaAtual <= colunas) {
-            diagonais.push({ linha: linhaAtual, coluna: colunaAtual });
+        if (currentline >= 1 && currentline <= rows && currentcolumn >= 1 && currentcolumn <= columns) {
+            diagonals.push({ row: currentline, column: currentcolumn });
         }
     });
 
-    return diagonais;
+    return diagonals;
 }
 
-function verificarCerco(linha, coluna) {
+function checksiege(row, column) {
     const adjacencias = [
-        { linha: linha - 1, coluna: coluna },
-        { linha: linha + 1, coluna: coluna },
-        { linha: linha, coluna: coluna - 1 },
-        { linha: linha, coluna: coluna + 1 }
+        { row: row - 1, column: column },
+        { row: row + 1, column: column },
+        { row: row, column: column - 1 },
+        { row: row, column: column + 1 }
     ];
 
-    // Contar o número de peças ao redor da nova posição
-    let contadorPecas = 0;
+    let counterPieces = 0;
 
     adjacencias.forEach(adjacente => {
-        const indexAdjacente = posicaoPecas.findIndex(
-            peca => peca.linha === adjacente.linha && peca.coluna === adjacente.coluna
+        const indexAdjacent = positionPieces.findIndex(
+            piece => piece.row === adjacente.row && piece.column === adjacente.column
         );
 
-        if (indexAdjacente !== -1) {
-            contadorPecas++;
+        if (indexAdjacent !== -1) {
+            counterPieces++;
         }
     });
 
-    // Se a Impiedosa está na borda e não fechou um cerco, retornar falso
-    if (linha === 1 || linha === linhas || coluna === 1 || coluna === colunas) {
-        return contadorPecas >= 2; // Dois vizinhos ou mais para cerco nas bordas
+    if (row === 1 || row === rows || column === 1 || column === columns) {
+        return counterPieces >= 2; 
     }
 
-    // Se não está na borda, um vizinho já fecha o cerco
-    return contadorPecas >= 1;
+    return counterPieces >= 1;
 }
-
-    
-    function podeCapturar(linha, coluna) {
-        const direcoes = [[1, 0], [0, 1], [-1, 0], [0, -1]]; // baixo, direita, cima, esquerda
-        for (let [dx, dy] of direcoes) {
-            const linhaAdjacente = linha + dx;
-            const colunaAdjacente = coluna + dy;
-    
-            // Encontrar índice da peça adjacente (se houver)
-            const indexPecaAdjacente = posicaoPecas.findIndex(
-                peca => peca.linha === linhaAdjacente && peca.coluna === colunaAdjacente
-            );
-    
-            if (indexPecaAdjacente !== -1) {
-                const pecaAdjacente = pecas[indexPecaAdjacente];
-    
-                // Verifica se a peça adjacente é um mosqueteiro adversário
-                if (pecaAdjacente.grupo === 1 || pecaAdjacente.grupo === 2) {
-                    const posicaoPecaAdjacente = posicaoPecas[indexPecaAdjacente];
-                    if (estaCercado(posicaoPecaAdjacente, indexPecaAdjacente)) {
-                        return true; // Um mosqueteiro adversário será capturado
-                    }
-                }
-            }
-        }
-        return false; // Nenhuma captura possível
-    }
     
     
-    function movimentoMatadora(direction) {
-        posicaoPecas.forEach((posicao, index) => {
-            if (pecas[index].grupo === 3) { // Se for a matadora
-                let novaLinha = posicao.linha;
-                let novaColuna = posicao.coluna;
+    function movimentKillerGirl(direction) {
+        positionPieces.forEach((position, index) => {
+            if (pieces[index].group === 3) { 
+                let newLine = position.row;
+                let newColumn = position.column;
     
                 switch (direction) {
                     case 'ArrowUp':
-                        novaLinha = Math.max(1, posicao.linha - 1);
+                        newLine = Math.max(1, position.row - 1);
                         break;
                     case 'ArrowDown':
-                        novaLinha = Math.min(linhas, posicao.linha + 1);
+                        newLine = Math.min(rows, position.row + 1);
                         break;
                     case 'ArrowLeft':
-                        novaColuna = Math.max(1, posicao.coluna - 1);
+                        newColumn = Math.max(1, position.column - 1);
                         break;
                     case 'ArrowRight':
-                        novaColuna = Math.min(colunas, posicao.coluna + 1);
+                        newColumn = Math.min(columns, position.column + 1);
                         break;
                 }
     
-                const posicaoOcupada = posicaoPecas.some(
-                    peca => peca.linha === novaLinha && peca.coluna === novaColuna
+                const positionoccupied = positionPieces.some(
+                    piece => piece.row === newLine && piece.column === newColumn
                 );
     
-                if (!posicaoOcupada && vaiCercar(novaLinha, novaColuna)) {
-                    posicao.linha = novaLinha;
-                    posicao.coluna = novaColuna;
-                    somMatadora();
-                    desenharTabuleiro();
+                if (!positionoccupied && ItWillSurround(newLine, newColumn)) {
+                    position.row = newLine;
+                    position.column = newColumn;
+                    soundKillerGirl();
+                    drawBoard();
                 } else {
-                    console.log("Movimento da matadora negado");
-                    falarMensagem("Killer girl's move denied");
+                    speakMessage("Killer girl's move denied");
                 }
             }
         });
-        verificarECapturarMosqueteiro();
+        checkAndCaptureMusketeer();
     }
     
 
         
 
-    function vaiCercar(linha, coluna) {
-        const direcoes = [[1, 0], [0, 1], [-1, 0], [0, -1]]; // baixo, direita, cima, esquerda
-        for (let [dx, dy] of direcoes) {
-            const linhaAdjacente = linha + dx;
-            const colunaAdjacente = coluna + dy;
+    function ItWillSurround(row, column) {
+        const directions = [[1, 0], [0, 1], [-1, 0], [0, -1]]; 
+        for (let [dx, dy] of directions) {
+            const lineAdjacent = row + dx;
+            const columnAdjacent = column + dy;
     
-            const indexPecaAdjacente = posicaoPecas.findIndex(
-                peca => peca.linha === linhaAdjacente && peca.coluna === colunaAdjacente
+            const indexPieceAdjacent = positionPieces.findIndex(
+                piece => piece.row === lineAdjacent && piece.column === columnAdjacent
             );
     
-            if (indexPecaAdjacente !== -1 && (pecas[indexPecaAdjacente].grupo === 1 || pecas[indexPecaAdjacente].grupo === 2)) {
-                // Verifica se a peça adjacente será cercada
-                const posicaoPecaAdjacente = posicaoPecas[indexPecaAdjacente];
-                if (estaCercadoComMatadora(posicaoPecaAdjacente, indexPecaAdjacente, linha, coluna)) {
-                    return true; // Um mosqueteiro será cercado
+            if (indexPieceAdjacent !== -1 && (pieces[indexPieceAdjacent].group === 1 || pieces[indexPieceAdjacent].group === 2)) {
+                const positionPieceAdjacent = positionPieces[indexPieceAdjacent];
+                if (thisSurroundedWithKillerGirl(positionPieceAdjacent, indexPieceAdjacent, row, column)) {
+                    return true; 
                 }
             }
         }
         return false;
     }
     
-    function estaCercadoComMatadora(posicao, indexPeca, linhaMatadora, colunaMatadora) {
-        const direcoes = [[1, 0], [0, 1], [-1, 0], [0, -1]];
-        return direcoes.every(([dx, dy]) => {
-            const linhaAdjacente = posicao.linha + dx;
-            const colunaAdjacente = posicao.coluna + dy;
+    function thisSurroundedWithKillerGirl(position, indexPiece, lineKillerGirl, columnKillerGirl) {
+        const directions = [[1, 0], [0, 1], [-1, 0], [0, -1]];
+        return directions.every(([dx, dy]) => {
+            const lineAdjacent = position.row + dx;
+            const columnAdjacent = position.column + dy;
     
-            // Considera a nova posição da matadora como ocupada
-            if (linhaAdjacente === linhaMatadora && colunaAdjacente === colunaMatadora) {
+            if (lineAdjacent === lineKillerGirl && columnAdjacent === columnKillerGirl) {
                 return true;
             }
     
-            return posicaoPecas.some((pos, i) => {
-                return pos.linha === linhaAdjacente &&
-                       pos.coluna === colunaAdjacente &&
-                       pecas[i].grupo !== pecas[indexPeca].grupo;
+            return positionPieces.some((pos, i) => {
+                return pos.row === lineAdjacent &&
+                       pos.column === columnAdjacent &&
+                       pieces[i].group !== pieces[indexPiece].group;
             });
         });
     }
@@ -487,31 +446,31 @@ function verificarCerco(linha, coluna) {
     
     
     
-    function falarPosicoesPecasJogador() {
-        let mensagem = " ";
-        posicaoPecas.forEach((peca, index) => {
-            if (pecas[index] && pecas[index].grupo === 1) {
-                mensagem += `Musketeer ${index + 1} on stripe ${peca.linha}, and track ${peca.coluna}. `;
+    function talkPositionsPecasPlayer() {
+        let message = " ";
+        positionPieces.forEach((piece, index) => {
+            if (pieces[index] && pieces[index].group === 1) {
+                message += `Musketeer ${index + 1} on strip ${piece.row}, and track ${piece.column}. `;
             }
         });
-        falarMensagem(mensagem);
+        speakMessage(message);
     }
     
-    function falarPosicoesPecasComputador() {
-        let mensagem = "";
-        posicaoPecas.forEach((peca, index) => {
-            if (pecas[index] && pecas[index].grupo === 2) {
-                const numeroMosqueteiro = index - Math.floor(pecas.length / 2) + 4;
-                mensagem += `Musketeer ${index + 1} on stripe ${peca.linha}, and track ${peca.coluna}. `;
+    function talkPositionsPartsComputer() {
+        let message = "";
+        positionPieces.forEach((piece, index) => {
+            if (pieces[index] && pieces[index].group === 2) {
+                const numberMusketeer = index - Math.floor(pieces.length / 2) + 4;
+                message += `Musketeer ${index + 1} on strip ${piece.row}, and track ${piece.column}. `;
             }
         });
-        falarMensagem(mensagem);
+        speakMessage(message);
     }
     
     
-    function pecaBloqueada(index) {
-        if (index !== undefined && posicaoPecas[index]) {
-            return bloqueada(index);
+    function pieceBlocked(index) {
+        if (index !== undefined && positionPieces[index]) {
+            return blocked(index);
         }
         return true;
     }
@@ -520,34 +479,34 @@ function verificarCerco(linha, coluna) {
     
     
     
-    function desenharTabuleiro() {
+    function drawBoard() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.lineWidth = 6;
     
-        for (let i = 1; i <= linhas; i++) {
-            for (let j = 1; j <= colunas; j++) {
-                const x = (j - 1) * tamanhoCelula;
-                const y = (i - 1) * tamanhoCelula;
+        for (let i = 1; i <= rows; i++) {
+            for (let j = 1; j <= columns; j++) {
+                const x = (j - 1) * cellSize;
+                const y = (i - 1) * cellSize;
     
-                ctx.fillStyle = tabuleiro[i][j] === 0 ? '#eee' : '#ddd';
-                ctx.fillRect(x, y, tamanhoCelula, tamanhoCelula);
+                ctx.fillStyle = board[i][j] === 0 ? '#eee' : '#ddd';
+                ctx.fillRect(x, y, cellSize, cellSize);
     
                 ctx.strokeStyle = '#000';
-                ctx.strokeRect(x, y, tamanhoCelula, tamanhoCelula);
+                ctx.strokeRect(x, y, cellSize, cellSize);
             }
         }
     
-        for (let i = 0; i < pecas.length; i++) {
-            if (posicaoPecas[i].linha !== -1 && posicaoPecas[i].coluna !== -1) {
-                const xPeca = (posicaoPecas[i].coluna - 1) * tamanhoCelula + tamanhoCelula / 2;
-                const yPeca = (posicaoPecas[i].linha - 1) * tamanhoCelula + tamanhoCelula / 2;
+        for (let i = 0; i < pieces.length; i++) {
+            if (positionPieces[i].row !== -1 && positionPieces[i].column !== -1) {
+                const xPiece = (positionPieces[i].column - 1) * cellSize + cellSize / 2;
+                const yPiece = (positionPieces[i].row - 1) * cellSize + cellSize / 2;
     
-                if (pecas[i].grupo === 4) {
-                    desenharCoracao(xPeca, yPeca, tamanhoCelula * 0.6);
-                } else if (pecas[i].grupo !== 5) {
-                    ctx.fillStyle = gruposDePecas[pecas[i].grupo];
+                if (pieces[i].group === 4) {
+                    drawHeart(xPiece, yPiece, cellSize * 0.6);
+                } else if (pieces[i].group !== 5) {
+                    ctx.fillStyle = groupPieces[pieces[i].group];
                     ctx.beginPath();
-                    ctx.arc(xPeca, yPeca, tamanhoCelula / 2 - 5, 0, 2 * Math.PI);
+                    ctx.arc(xPiece, yPiece, cellSize / 2 - 5, 0, 2 * Math.PI);
                     ctx.fill();
                     ctx.stroke();
                 }
@@ -557,57 +516,57 @@ function verificarCerco(linha, coluna) {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
     
-                let numeroTexto;
-                if (pecas[i].grupo === 1) {
-                    numeroTexto = i + 1; // Mosqueteiros do jogador
-                } else if (pecas[i].grupo === 2) {
-                    numeroTexto = i - 2; // Mosqueteiros do computador
-                } else if (pecas[i].grupo === 3) {
-                    numeroTexto = 'M'; // Matadora
-                } else if (pecas[i].grupo === 4) {
-                    numeroTexto = ''; // Impiedosa
+                let numberText;
+                if (pieces[i].group === 1) {
+                    numberText = i + 1; 
+                } else if (pieces[i].group === 2) {
+                    numberText = i - 2; 
+                } else if (pieces[i].group === 3) {
+                    numberText = 'K'; // killerGirl
+                } else if (pieces[i].group === 4) {
+                    numberText = ''; 
                 } else {
-                    numeroTexto = ''; // Grupo 5 ou outras peças não especificadas
+                    numberText = ''; 
                 }
     
-                ctx.fillText(numeroTexto, xPeca, yPeca);
+                ctx.fillText(numberText, xPiece, yPiece);
             }
         }
     }
     
     
  
-    function desenharCoracao(x, y, tamanho) {
+    function drawHeart(x, y, size) {
         ctx.beginPath();
-        const topCurveHeight = tamanho * 0.3;
-        x -= tamanho * 0.4;
-        y -= tamanho * 0.4;
+        const topCurveHeight = size * 0.3;
+        x -= size * 0.4;
+        y -= size * 0.4;
     
         ctx.moveTo(x, y + topCurveHeight);
         // Top left curve
         ctx.bezierCurveTo(
             x, y, 
-            x - tamanho / 2, y, 
-            x - tamanho / 2, y + topCurveHeight
+            x - size / 2, y, 
+            x - size / 2, y + topCurveHeight
         );
     
         // Bottom left curve
         ctx.bezierCurveTo(
-            x - tamanho / 2, y + (tamanho + topCurveHeight) / 2, 
-            x, y + (tamanho + topCurveHeight) / 2, 
-            x, y + tamanho
+            x - size / 2, y + (size + topCurveHeight) / 2, 
+            x, y + (size + topCurveHeight) / 2, 
+            x, y + size
         );
     
         // Bottom right curve
         ctx.bezierCurveTo(
-            x, y + (tamanho + topCurveHeight) / 2, 
-            x + tamanho / 2, y + (tamanho + topCurveHeight) / 2, 
-            x + tamanho / 2, y + topCurveHeight
+            x, y + (size + topCurveHeight) / 2, 
+            x + size / 2, y + (size + topCurveHeight) / 2, 
+            x + size / 2, y + topCurveHeight
         );
     
         // Top right curve
         ctx.bezierCurveTo(
-            x + tamanho / 2, y, 
+            x + size / 2, y, 
             x, y, 
             x, y + topCurveHeight
         );
@@ -618,214 +577,209 @@ function verificarCerco(linha, coluna) {
         ctx.stroke();
     }
     
-    function movePeca(direction) {
-        const indexPeca = pecaSelecionada - 1; 
+    function movePiece(direction) {
+        const indexPiece = pieceSelected - 1; 
 
-    if (indexPeca !== -1 && pecas[indexPeca].grupo === grupoAtual) {
-        let novaLinha = posicaoPecas[indexPeca].linha;
-        let novaColuna = posicaoPecas[indexPeca].coluna;
+    if (indexPiece !== -1 && pieces[indexPiece].group === currentgroup) {
+        let newLine = positionPieces[indexPiece].row;
+        let newColumn = positionPieces[indexPiece].column;
 
         switch (direction) {
             case 'ArrowUp':
-                novaLinha = Math.max(1, novaLinha - 1);
+                newLine = Math.max(1, newLine - 1);
                 break;
             case 'ArrowDown':
-                novaLinha = Math.min(linhas, novaLinha + 1);
+                newLine = Math.min(rows, newLine + 1);
                 break;
             case 'ArrowLeft':
-                novaColuna = Math.max(1, novaColuna - 1);
+                newColumn = Math.max(1, newColumn - 1);
                 break;
             case 'ArrowRight':
-                novaColuna = Math.min(colunas, novaColuna + 1);
+                newColumn = Math.min(columns, newColumn + 1);
                 break;
         }
 
-        const indexPosicaoOcupada = posicaoPecas.findIndex(
-            peca => peca.linha === novaLinha && peca.coluna === novaColuna
+        const indexOccupiedPosition = positionPieces.findIndex(
+            piece => piece.row === newLine && piece.column === newColumn
         );
 
-        if (indexPosicaoOcupada !== -1) {
-            console.log("Movimento inválido: a célula já está ocupada.");
-            const pecaOcupante = pecas[indexPosicaoOcupada];
+        if (indexOccupiedPosition !== -1) {
+            const pieceOccupant = pieces[indexOccupiedPosition];
 
-            if (pecaOcupante.grupo === 3 && indexPosicaoOcupada === 6) {
-                falarMensagem("Position occupied by the killer girl.");
-            } else if(pecaOcupante.grupo === 2) {
-                let numeroPeca;
-                if (pecaOcupante.grupo === 2) {
-                    numeroPeca = indexPosicaoOcupada - 2;
+            if (pieceOccupant.group === 3 && indexOccupiedPosition === 6) {
+                speakMessage("Position occupied by the killer girl.");
+            } else if(pieceOccupant.group === 2) {
+                let numberPiece;
+                if (pieceOccupant.group === 2) {
+                    numberPiece = indexOccupiedPosition - 2;
                 } else {
-                    numeroPeca = indexPosicaoOcupada + 1;
+                    numberPiece = indexOccupiedPosition + 1;
                 }
 
-                falarMensagem(`Position occupied by the musketeer ${numeroPeca} of the computer.`);
-            } else if(pecaOcupante.grupo === 1){
-                let numeroPeca;
-                if (pecaOcupante.grupo === 1) {
-                    numeroPeca = indexPosicaoOcupada+1;
+                speakMessage(`Position occupied by the musketeer ${numberPiece} of the computer.`);
+            } else if(pieceOccupant.group === 1){
+                let numberPiece;
+                if (pieceOccupant.group === 1) {
+                    numberPiece = indexOccupiedPosition+1;
                 } else {
-                    numeroPeca = indexPosicaoOcupada+1;
+                    numberPiece = indexOccupiedPosition+1;
                 }
 
-                falarMensagem(`Position occupied by the player's musketeer ${numberPeca}.`);
-            }else if(pecaOcupante.grupo === 4 || pecaOcupante.grupo === 5){
+                speakMessage(`Position occupied by the player's musketeer ${numberPiece}.`);
+            }else if(pieceOccupant.group === 4 || pieceOccupant.group === 5){
 
-                falarMensagem(`Position occupied by the ruthless.`);
+                speakMessage(`Position occupied by the ruthless.`);
             }else{
-                falarMensagem("Move denied. You cannot escape the board");
+                speakMessage("Move denied. You cannot escape the board");
             }
 
 
             return;
         }
         if (
-            novaLinha !== posicaoPecas[indexPeca].linha ||
-            novaColuna !== posicaoPecas[indexPeca].coluna
+            newLine !== positionPieces[indexPiece].row ||
+            newColumn !== positionPieces[indexPiece].column
         ) {
-            const novaPosicaoOcupada = posicaoPecas.some(
-                (peca, i) =>
-                    i !== indexPeca &&
-                    peca &&
-                    pecas[i] &&
-                    pecas[indexPeca] &&
-                    pecas[i].grupo === pecas[indexPeca].grupo &&
-                    peca.linha === novaLinha &&
-                    peca.coluna === novaColuna
+            const newPositionOccupied = positionPieces.some(
+                (piece, i) =>
+                    i !== indexPiece &&
+                    piece &&
+                    pieces[i] &&
+                    pieces[indexPiece] &&
+                    pieces[i].group === pieces[indexPiece].group &&
+                    piece.row === newLine &&
+                    piece.column === newColumn
             );
 
-            const posicaoOcupadaPorGrupo2 = posicaoPecas.some(
-                (peca, i) =>
-                    peca &&
-                    pecas[i] &&
-                    pecas[i].grupo === 2 &&
-                    peca.linha === novaLinha &&
-                    peca.coluna === novaColuna
+            const positionOccupiedByGroup2 = positionPieces.some(
+                (piece, i) =>
+                    piece &&
+                    pieces[i] &&
+                    pieces[i].group === 2 &&
+                    piece.row === newLine &&
+                    piece.column === newColumn
             );
 
-            if (!novaPosicaoOcupada && !posicaoOcupadaPorGrupo2) {
-                posicaoPecas[indexPeca].linha = novaLinha;
-                posicaoPecas[indexPeca].coluna = novaColuna;
+            if (!newPositionOccupied && !positionOccupiedByGroup2) {
+                positionPieces[indexPiece].row = newLine;
+                positionPieces[indexPiece].column = newColumn;
 
-                reproduzirSom(grupoAtual);
-                desenharTabuleiro();
+                playSound(currentgroup);
+                drawBoard();
 
-                if(grupoAtual === 1){
-                    contaminjogador +=1;
-                    falarMensagem(`You moved musketeer ${pecaSelecionada}  to stripe ${novaLinha}, track ${novaColuna}`);
-                    console.log(`Jogador moveu Linha ${novaLinha}, Coluna ${novaColuna}`);
-                    console.log(contamincomput);
+                if(currentgroup === 1){
+                    minimumplayeraccount +=1;
+                    speakMessage(`You moved musketeer ${pieceSelected}  to strip ${newLine}, track ${newColumn}`);
+                    console.log(minimumcomputeraccount);
                 }
                 else{
-                    contamincomput +=1;
-                    falarMensagem(`Computer chose musketeer  ${pecaSelecionada -3} and movied it to stripe ${posicaoPecas[indexPeca].linha}, and track ${posicaoPecas[indexPeca].coluna}.`);
-                    console.log(`Computador moveu para Linha ${posicaoPecas[indexPeca].linha}, Coluna ${posicaoPecas[indexPeca].coluna}.`)
+                    minimumcomputeraccount +=1;
+                    speakMessage(`Computer chose musketeer  ${pieceSelected -3} and movied it to strip ${positionPieces[indexPiece].row}, and track ${positionPieces[indexPiece].column}.`);
                 }
 
-                movimentoRealizado = true;
+                movementExecuted = true;
                 setTimeout(() => {
-                    movimentoRealizado = false;
-                    grupoAtual = (grupoAtual % 2) + 1;
+                    movementExecuted = false;
+                    currentgroup = (currentgroup % 2) + 1;
 
-                    if (grupoAtual === 2) {
-                        movimentoComputador();
+                    if (currentgroup === 2) {
+                        movementComputer();
                     } else {
-                        falarMensagem("Your turm");
+                        speakMessage("Your turm");
                     }
                 }, 1000);
             }
         }
     }
-    verificarECapturarMosqueteiro();
+    checkAndCaptureMusketeer();
 }
 
-function movimentoComputador() {
-    const pecasMoveis = posicaoPecas
-        .map((peca, index) => ({ index, peca }))
-        .filter(({ index, peca }) => pecas[index].grupo === 2 && !bloqueada(index));
+function movementComputer() {
+    const FurniturePieces = positionPieces
+        .map((piece, index) => ({ index, piece }))
+        .filter(({ index, piece }) => pieces[index].group === 2 && !blocked(index));
 
-    if (pecasMoveis.length > 0) {
-        const pecaEscolhida = pecasMoveis[Math.floor(Math.random() * pecasMoveis.length)];
-        pecaSelecionada = pecaEscolhida.index + 1;
+    if (FurniturePieces.length > 0) {
+        const pieceChosen = FurniturePieces[Math.floor(Math.random() * FurniturePieces.length)];
+        pieceSelected = pieceChosen.index + 1;
 
-        console.log(`Computer chose piece number ${pecaSelecionada - 3}`);
-        const direcoesPossiveis = [];
-        const { linha, coluna } = pecaEscolhida.peca;
+        console.log(`Computer chose piece number ${pieceSelected - 3}`);
+        const possibleDirections = [];
+        const { row, column } = pieceChosen.piece;
 
-        if (linha > 1 && !posicaoOcupada(linha - 1, coluna)) {
-            direcoesPossiveis.push('ArrowUp');
+        if (row > 1 && !positionOccupied(row - 1, column)) {
+            possibleDirections.push('ArrowUp');
         }
-        if (linha < linhas && !posicaoOcupada(linha + 1, coluna)) {
-            direcoesPossiveis.push('ArrowDown');
+        if (row < rows && !positionOccupied(row + 1, column)) {
+            possibleDirections.push('ArrowDown');
         }
-        if (coluna > 1 && !posicaoOcupada(linha, coluna - 1)) {
-            direcoesPossiveis.push('ArrowLeft');
+        if (column > 1 && !positionOccupied(row, column - 1)) {
+            possibleDirections.push('ArrowLeft');
         }
-        if (coluna < colunas && !posicaoOcupada(linha, coluna + 1)) {
-            direcoesPossiveis.push('ArrowRight');
+        if (column < columns && !positionOccupied(row, column + 1)) {
+            possibleDirections.push('ArrowRight');
         }
 
-        if (direcoesPossiveis.length > 0) {
-            const direcaoEscolhida = direcoesPossiveis[Math.floor(Math.random() * direcoesPossiveis.length)];
-            movePeca(direcaoEscolhida);
+        if (possibleDirections.length > 0) {
+            const direcaoEscolhida = possibleDirections[Math.floor(Math.random() * possibleDirections.length)];
+            movePiece(direcaoEscolhida);
         } else {
-            console.log(`The piece númber ${pecaSelecionada - 3} is blocked. Choosing another piece.`);
-            movimentoComputador(); // Escolhe outra peça se a escolhida está bloqueada
+            console.log(`The piece númber ${pieceSelected - 3} is blocked. Choosing another piece.`);
+            movementComputer(); 
         }
     }
-    verificarECapturarMosqueteiro();
+    checkAndCaptureMusketeer();
 }
 
 
 
     
-        function posicaoOcupada(linha, coluna) {
-            return posicaoPecas.some((peca) => peca && peca.linha === linha && peca.coluna === coluna);
+        function positionOccupied(row, column) {
+            return positionPieces.some((piece) => piece && piece.row === row && piece.column === column);
         }
 
     
 
-    function bloqueada(index) {
-        if (index !== undefined && posicaoPecas[index]) {
-            return posicaoPecas.some((peca, i) => i !== index && pecas[i] &&
-                pecas[index] && pecas[i].grupo === pecas[index].grupo &&
-                peca.linha === posicaoPecas[index].linha &&
-                peca.coluna === posicaoPecas[index].coluna);
+    function blocked(index) {
+        if (index !== undefined && positionPieces[index]) {
+            return positionPieces.some((piece, i) => i !== index && pieces[i] &&
+                pieces[index] && pieces[i].group === pieces[index].group &&
+                piece.row === positionPieces[index].row &&
+                piece.column === positionPieces[index].column);
         }
         return false;
     }
 
     
-    function verificarECapturarMosqueteiro() {
-        posicaoPecas.forEach((posicao, index) => {
-            if (pecas[index].grupo === 1 || pecas[index].grupo === 2) {
-                if (estaCercado(posicao, index)) {
-                    somCaputura();
-                    console.log(`Mosqueteiro na posição (linha ${posicao.linha}, coluna ${posicao.coluna}) foi capturado!`);
-                    falarMensagem(`Musketeer at position stripe ${posicao.linha}, track ${posicao.coluna} has been captured!`);
+    function checkAndCaptureMusketeer() {
+        positionPieces.forEach((position, index) => {
+            if (pieces[index].group === 1 || pieces[index].group === 2) {
+                if (thissurrounded(position, index)) {
+                    SoundCapture();
+                    speakMessage(`Musketeer at position strip ${position.row}, track ${position.column} has been captured!`);
                     
-                    const remocaoBemSucedida = removerPecaDoTabuleiro(index);
+                    const successfulRemoval = removePieceFromBoard(index);
 
-                    // Verifique se a remoção foi bem-sucedida
-                    if (remocaoBemSucedida) {
-                        console.log(`A peça foi removida com sucesso!`);
-                        retiradaImpiedosa([4,5]);
-                        if(grupoAtual === 1){
-                            grupoAtual = 2;
-                            movimentoComputador();
+                    // Check if the removal was successful
+                    if (successfulRemoval) {
+                        console.log(`The piece was removed successfully!`);
+                        rethlessLadyWithdrawal([4,5]);
+                        if(currentgroup === 1){
+                            currentgroup = 2;
+                            movementComputer();
                         }else{
-                            grupoAtual = 1;
+                            currentgroup = 1;
                         }
                     } else {
-                        console.log(`Falha ao remover a peça!`);
+                        console.log(`Failed to remove piece!`);
                     }
                    
                 }
     
-                if (podeLiberarMatadora(posicao, index)) {
-                    // Se o mosqueteiro estiver cercado por três lados, libere o movimento da matadora
-                    console.log(`Mosqueteiro na posição (linha ${posicao.linha}, coluna ${posicao.coluna}) está cercado por três lados. Movimento da matadora liberado!`);
-                    falarMensagem(`Musketeer at position stripe ${posicao.linha}, track ${posicao.coluna}) it is surrounded on three sides. Killer girl movement released!`);
-                    matadora = true;
+                if (canReleaseKillerGirl(position, index)) {
+                    // If the musketeer is surrounded on three sides, release killerGirl's movement
+                    speakMessage(`Musketeer at position strip ${position.row}, track ${position.column}) it is surrounded on three sides. Killer girl movement released!`);
+                    killerGirl = true;
                 }
 
             }
@@ -838,71 +792,65 @@ function movimentoComputador() {
 
 
 
-    function retiradaImpiedosa() {
-        posicaoPecas.forEach((posicao, index) => {
-            const grupoDaPeca = pecas[index].grupo;
+    function rethlessLadyWithdrawal() {
+        positionPieces.forEach((position, index) => {
+            const groupofthepiece = pieces[index].group;
     
-            // Verifica se a peça pertence aos grupos 4 ou 5
-            if (grupoDaPeca === 4 || grupoDaPeca === 5) {
-                posicaoPecas[index] = { linha: -1, coluna: -1 };
-                console.log(`Impiedosa (linha -1, coluna -1) movida para o índice ${index}`);
+            if (groupofthepiece === 4 || groupofthepiece === 5) {
+                positionPieces[index] = { row: -1, column: -1 };
+                console.log(`Ruthless Lady (row -1, column -1) moved to index ${index}`);
             }
         });
     
-        // Atualiza o tabuleiro após mover as peças
-        desenharTabuleiro();
+        drawBoard();
     }
     
     
 
      
-    function removerPecaDoTabuleiro(index) {
-        // Remove a peça do tabuleiro. A lógica exata dependerá de como seu tabuleiro e peças são gerenciados.
-        posicaoPecas.splice(index, 1);
-        pecas.splice(index, 1);
-        // Atualize o tabuleiro para refletir a remoção da peça
-        desenharTabuleiro();
+    function removePieceFromBoard(index) {
+        positionPieces.splice(index, 1);
+        pieces.splice(index, 1);
+        drawBoard();
         return true;
     }
 
 
 
 
-    function podeLiberarMatadora(posicao, indexMosqueteiro) {
-        const direcoes = [[1, 0], [0, 1], [-1, 0], [0, -1]]; // baixo, direita, cima, esquerda
-        let ladosOpostos = 0;
+    function canReleaseKillerGirl(position, indexMusketeer) {
+        const directions = [[1, 0], [0, 1], [-1, 0], [0, -1]]; 
+        let oppositeSides = 0;
     
-        for (let [dx, dy] of direcoes) {
-            const linhaAdjacente = posicao.linha + dx;
-            const colunaAdjacente = posicao.coluna + dy;
+        for (let [dx, dy] of directions) {
+            const lineAdjacent = position.row + dx;
+            const columnAdjacent = position.column + dy;
     
-            const indexPecaAdjacente = posicaoPecas.findIndex(
-                peca => peca.linha === linhaAdjacente && peca.coluna === colunaAdjacente
+            const indexPieceAdjacent = positionPieces.findIndex(
+                piece => piece.row === lineAdjacent && piece.column === columnAdjacent
             );
     
-            if (indexPecaAdjacente !== -1 && (pecas[indexPecaAdjacente].grupo === 1 || pecas[indexPecaAdjacente].grupo === 2)) {
-                // Verifica se a peça adjacente é um mosqueteiro adversário
-                const posicaoPecaAdjacente = posicaoPecas[indexPecaAdjacente];
-                if (!estaCercado(posicaoPecaAdjacente, indexPecaAdjacente)) {
-                    ladosOpostos++;
+            if (indexPieceAdjacent !== -1 && (pieces[indexPieceAdjacent].group === 1 || pieces[indexPieceAdjacent].group === 2)) {
+                const positionPieceAdjacent = positionPieces[indexPieceAdjacent];
+                if (!thissurrounded(positionPieceAdjacent, indexPieceAdjacent)) {
+                    oppositeSides++;
                 }
             }
         }
     
-        // Se o mosqueteiro estiver cercado por três lados, libera o movimento da matadora
-        return ladosOpostos === 3;
+        return oppositeSides === 3;
     }
     
     
-    function estaCercado(posicao, indexPeca) {
-        const direcoes = [[1, 0], [0, 1], [-1, 0], [0, -1]]; // Representa as quatro direções: baixo, direita, cima, esquerda
-        return direcoes.every(([dx, dy]) => {
-            const linhaAdjacente = posicao.linha + dx;
-            const colunaAdjacente = posicao.coluna + dy;
-            return posicaoPecas.some((pos, i) => {
-                return pos.linha === linhaAdjacente &&
-                       pos.coluna === colunaAdjacente &&
-                       (pecas[i].grupo !== pecas[indexPeca].grupo || pecas[i].grupo === 3); // Verifica se é uma peça adversária ou a matadora
+    function thissurrounded(position, indexPiece) {
+        const directions = [[1, 0], [0, 1], [-1, 0], [0, -1]];
+        return directions.every(([dx, dy]) => {
+            const lineAdjacent = position.row + dx;
+            const columnAdjacent = position.column + dy;
+            return positionPieces.some((pos, i) => {
+                return pos.row === lineAdjacent &&
+                       pos.column === columnAdjacent &&
+                       (pieces[i].group !== pieces[indexPiece].group || pieces[i].group === 3); 
             });
         });
     }
