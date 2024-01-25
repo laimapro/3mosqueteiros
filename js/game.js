@@ -13,22 +13,22 @@ document.addEventListener('DOMContentLoaded', () => {
     
 Swal.fire({
     
-    title: 'Escolha posição do tabuleiro',
+    title: 'Choose board position',
     input: 'select',
     inputOptions: {
-        '1': 'Inferior',
-        '2': 'Topo',
+        '1': 'Bottom',
+        '2': 'Top',
     },
-    inputPlaceholder: 'iniciar com os mosqueteiros no',
+    inputPlaceholder: 'start with the musketeers on the',
     showCancelButton: true,
-    confirmButtonText: 'Iniciar Jogo',
-    cancelButtonText: 'Cancelar',
+    confirmButtonText: 'Start Game',
+    cancelButtonText: 'Cancel',
     inputValidator: (value) => {
         return new Promise((resolve) => {
             if (value === '1' || value === '2') {
                 resolve();
             } else {
-                resolve('Escolha um grupo válido.');
+                resolve('Choose a valid group.');
             }
         });
     },
@@ -36,7 +36,7 @@ Swal.fire({
     if (result.isConfirmed) {
         simularEscolha(result.value);
         posicionarPecasIniciais(result.value);
-        falarMensagem("Sua vez, escolha um mosqueteiro");
+        falarMensagem("Your turn, choose a musketeer");
     }
 });
 
@@ -89,6 +89,10 @@ function simularEscolha(valor) {
             }
     
             utterance = new SpeechSynthesisUtterance(mensagem);
+    
+            // Defina o idioma para inglês britânico
+            utterance.lang = 'en-GB';
+    
             speechSynthesis.speak(utterance);
         }
     }
@@ -130,7 +134,7 @@ function simularEscolha(valor) {
                 }
             }
         }
-        falarMensagem("Pressione 's' para desativar a voz e 's' para reativá-la. ")
+        falarMensagem("Press 's' to turn off the voice and 's' to turn it back on.")
         desenharTabuleiro();
     }
     
@@ -145,7 +149,7 @@ function simularEscolha(valor) {
 
 
     if( vozAtivada == true){
-        falarMensagem("Escolha posição do tabuleiro. Pressione T para iniciar com os mosqueteiros no topo da tela. Pressione I para iniciar com os mosqueteiros na parte inferior. Então pressione enter para jogar");
+        falarMensagem("Choose board position. Press T to start with the musketeers at the top of the screen. Press I to start with the musketeers at the bottom. Then press enter to play");
     }
 
     let aguardandoPosicaoImpiedosa = false;
@@ -174,7 +178,7 @@ function simularEscolha(valor) {
         } else if (event.key >= '1' && event.key <= '3') {
             pecaSelecionada = parseInt(event.key, 10);
             console.log(`Peça ${pecaSelecionada} selecionada.`);
-            falarMensagem(`Você escolheu mosqueteiro ${pecaSelecionada}`);
+            falarMensagem(`You chose musketeer ${pecaSelecionada}`);
         } else if (event.key === 'c' || event.key === 'C') {
             falarPosicoesPecasComputador();
         } else if (event.key === 'j' || event.key === 'J') {
@@ -184,17 +188,17 @@ function simularEscolha(valor) {
         } else if (event.key === 'i' || event.key === 'I') {
             aguardandoPosicaoImpiedosa = true;
             console.log("Digite a linha e depois a coluna para a peça impiedosa");
-            falarMensagem("Digite o numero da faixa e da trilha para posicionar a impiedosa")
+            falarMensagem("Enter a number for the stripe and for the track to position the ruthless lady ")
         } else if (event.key === 's' || event.key === 'S') {
             if (vozAtivada) {
                 vozAtivada = false;
             } else {
                 vozAtivada = true;
-                falarMensagem("Voz ativada. Pressione 's' novamente para desativar.");
+                falarMensagem("Voice activated. Press 's' again to deactivate it.");
             }
         } else if (event.key === 'm' || event.key === 'M') {
             matadora = true;
-            falarMensagem("Você selecionou a matadora. prossiga com a captura.");
+            falarMensagem("You have selected the killer girl. proceed with the capture.");
         }
 
         if (matadora && event.key.startsWith('Arrow')) {
@@ -210,22 +214,22 @@ function simularEscolha(valor) {
         if (indexMatadora !== -1) {
             const posicaoMatadora = posicaoPecas[indexMatadora];
             console.log(`Matadora está na faixa ${posicaoMatadora.linha}, trilha ${posicaoMatadora.coluna}.`);
-            falarMensagem(`Matadora está na faixa ${posicaoMatadora.linha}, trilha ${posicaoMatadora.coluna}.`);
+            falarMensagem(`Killer girls is on stripe ${posicaoMatadora.linha}, track ${posicaoMatadora.coluna}.`);
         }
     
         if (indexImpiedosa !== -1) {
             const posicaoImpiedosa = posicaoPecas[indexImpiedosa];
-            console.log(`Impiedosa está na faixa ${posicaoImpiedosa.linha}, trilha ${posicaoImpiedosa.coluna}.`);
+            console.log(`The ruthless lady is on stripe ${posicaoImpiedosa.linha}, track ${posicaoImpiedosa.coluna}.`);
             if(posicaoImpiedosa.linha === 0){
-                falarMensagem('Impiedosa só está esperando você para capturar');
+                falarMensagem('The ruthless lady is just waiting for you to capture');
 
             }else if(posicaoImpiedosa.linha === -1){
-                falarMensagem('Impiedosa só está esperando você para capturar');
+                falarMensagem('The ruthless lady is just waiting for you to capture');
                 
 
 
             }else{
-                falarMensagem(`Impiedosa está na faixa ${posicaoImpiedosa.linha}, trilha ${posicaoImpiedosa.coluna}.`);
+                falarMensagem(`The ruthless lady is on stripe ${posicaoImpiedosa.linha}, track ${posicaoImpiedosa.coluna}.`);
             }
             
         }
@@ -242,7 +246,7 @@ function simularEscolha(valor) {
        
             if (indexPosicaoOcupada !== -1) {
                 console.log("Movimento inválido: a célula já está ocupada.");
-                falarMensagem("Movimento negado!");
+                falarMensagem("Movement denied!");
 
                 return false;
             }
@@ -251,7 +255,7 @@ function simularEscolha(valor) {
         const cercoFechado = verificarCerco(linha, coluna);
     
         if (!cercoFechado) {
-            falarMensagem("Movimento negado!");
+            falarMensagem("Movement denied!");
 
             return false;
         }
@@ -315,7 +319,7 @@ function simularEscolha(valor) {
             }
         });
     
-        falarMensagem(`Impiedosa movida para faixa ${linha} e trilha ${coluna}. Prossiga para captura.`);
+        falarMensagem(`the ruthless lady movies to stripe ${linha} and track ${coluna}. Procreed to capture.`);
         somImpiedosa();
         mostrarPecasProximas(linha, coluna);
         
@@ -430,7 +434,7 @@ function verificarCerco(linha, coluna) {
                     desenharTabuleiro();
                 } else {
                     console.log("Movimento da matadora negado");
-                    falarMensagem("Movimento da matadora negado");
+                    falarMensagem("Killer girl's move denied");
                 }
             }
         });
@@ -487,7 +491,7 @@ function verificarCerco(linha, coluna) {
         let mensagem = " ";
         posicaoPecas.forEach((peca, index) => {
             if (pecas[index] && pecas[index].grupo === 1) {
-                mensagem += `Mosqueteiro ${index + 1} está na faixa ${peca.linha}, trilha ${peca.coluna}. `;
+                mensagem += `Musketeer ${index + 1} on stripe ${peca.linha}, and track ${peca.coluna}. `;
             }
         });
         falarMensagem(mensagem);
@@ -498,7 +502,7 @@ function verificarCerco(linha, coluna) {
         posicaoPecas.forEach((peca, index) => {
             if (pecas[index] && pecas[index].grupo === 2) {
                 const numeroMosqueteiro = index - Math.floor(pecas.length / 2) + 4;
-                mensagem += `Mosqueteiro ${numeroMosqueteiro} está na faixa ${peca.linha}, trilha ${peca.coluna}. `;
+                mensagem += `Musketeer ${index + 1} on stripe ${peca.linha}, and track ${peca.coluna}. `;
             }
         });
         falarMensagem(mensagem);
@@ -645,7 +649,7 @@ function verificarCerco(linha, coluna) {
             const pecaOcupante = pecas[indexPosicaoOcupada];
 
             if (pecaOcupante.grupo === 3 && indexPosicaoOcupada === 6) {
-                falarMensagem("Posição ocupada pela matadora.");
+                falarMensagem("Position occupied by the killer girl.");
             } else if(pecaOcupante.grupo === 2) {
                 let numeroPeca;
                 if (pecaOcupante.grupo === 2) {
@@ -654,7 +658,7 @@ function verificarCerco(linha, coluna) {
                     numeroPeca = indexPosicaoOcupada + 1;
                 }
 
-                falarMensagem(`Posição ocupada pelo mosqueteiro ${numeroPeca} do computador.`);
+                falarMensagem(`Position occupied by the musketeer ${numeroPeca} of the computer.`);
             } else if(pecaOcupante.grupo === 1){
                 let numeroPeca;
                 if (pecaOcupante.grupo === 1) {
@@ -663,12 +667,12 @@ function verificarCerco(linha, coluna) {
                     numeroPeca = indexPosicaoOcupada+1;
                 }
 
-                falarMensagem(`Posição ocupada pelo mosqueteiro ${numeroPeca} do jogador.`);
+                falarMensagem(`Position occupied by the player's musketeer ${numberPeca}.`);
             }else if(pecaOcupante.grupo === 4 || pecaOcupante.grupo === 5){
 
-                falarMensagem(`Posição ocupada pela impiedosa.`);
+                falarMensagem(`Position occupied by the ruthless.`);
             }else{
-                falarMensagem("Movimento negado. Você não pode fugir do tabuleiro");
+                falarMensagem("Move denied. You cannot escape the board");
             }
 
 
@@ -707,13 +711,13 @@ function verificarCerco(linha, coluna) {
 
                 if(grupoAtual === 1){
                     contaminjogador +=1;
-                    falarMensagem(`Você moveu mosqueteiro ${pecaSelecionada}  para faixa ${novaLinha}, trilha ${novaColuna}`);
+                    falarMensagem(`You moved musketeer ${pecaSelecionada}  to stripe ${novaLinha}, track ${novaColuna}`);
                     console.log(`Jogador moveu Linha ${novaLinha}, Coluna ${novaColuna}`);
                     console.log(contamincomput);
                 }
                 else{
                     contamincomput +=1;
-                    falarMensagem(`Computador escolheu mosqueteiro ${pecaSelecionada -3} e  moveu para faixa ${posicaoPecas[indexPeca].linha}, trilha ${posicaoPecas[indexPeca].coluna}.`);
+                    falarMensagem(`Computer chose musketeer  ${pecaSelecionada -3} and movied it to stripe ${posicaoPecas[indexPeca].linha}, and track ${posicaoPecas[indexPeca].coluna}.`);
                     console.log(`Computador moveu para Linha ${posicaoPecas[indexPeca].linha}, Coluna ${posicaoPecas[indexPeca].coluna}.`)
                 }
 
@@ -725,7 +729,7 @@ function verificarCerco(linha, coluna) {
                     if (grupoAtual === 2) {
                         movimentoComputador();
                     } else {
-                        falarMensagem("Sua vez");
+                        falarMensagem("Your turm");
                     }
                 }, 1000);
             }
@@ -743,7 +747,7 @@ function movimentoComputador() {
         const pecaEscolhida = pecasMoveis[Math.floor(Math.random() * pecasMoveis.length)];
         pecaSelecionada = pecaEscolhida.index + 1;
 
-        console.log(`Computador escolheu a peça número ${pecaSelecionada - 3}`);
+        console.log(`Computer chose piece number ${pecaSelecionada - 3}`);
         const direcoesPossiveis = [];
         const { linha, coluna } = pecaEscolhida.peca;
 
@@ -764,7 +768,7 @@ function movimentoComputador() {
             const direcaoEscolhida = direcoesPossiveis[Math.floor(Math.random() * direcoesPossiveis.length)];
             movePeca(direcaoEscolhida);
         } else {
-            console.log(`A peça número ${pecaSelecionada - 3} está bloqueada. Escolhendo outra peça.`);
+            console.log(`The piece númber ${pecaSelecionada - 3} is blocked. Choosing another piece.`);
             movimentoComputador(); // Escolhe outra peça se a escolhida está bloqueada
         }
     }
@@ -797,7 +801,7 @@ function movimentoComputador() {
                 if (estaCercado(posicao, index)) {
                     somCaputura();
                     console.log(`Mosqueteiro na posição (linha ${posicao.linha}, coluna ${posicao.coluna}) foi capturado!`);
-                    falarMensagem(`Mosqueteiro na posição (faixa ${posicao.linha}, trilha ${posicao.coluna}) foi capturado!`);
+                    falarMensagem(`Musketeer at position stripe ${posicao.linha}, track ${posicao.coluna} has been captured!`);
                     
                     const remocaoBemSucedida = removerPecaDoTabuleiro(index);
 
@@ -820,7 +824,7 @@ function movimentoComputador() {
                 if (podeLiberarMatadora(posicao, index)) {
                     // Se o mosqueteiro estiver cercado por três lados, libere o movimento da matadora
                     console.log(`Mosqueteiro na posição (linha ${posicao.linha}, coluna ${posicao.coluna}) está cercado por três lados. Movimento da matadora liberado!`);
-                    falarMensagem(`Mosqueteiro na posição (faixa ${posicao.linha}, trilha ${posicao.coluna}) está cercado por três lados. Movimento da matadora liberado!`);
+                    falarMensagem(`Musketeer at position stripe ${posicao.linha}, track ${posicao.coluna}) it is surrounded on three sides. Killer girl movement released!`);
                     matadora = true;
                 }
 
