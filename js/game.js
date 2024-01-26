@@ -211,9 +211,9 @@ function chooseBoardPosition(valor) {
         }else if (event.key === 'q' || event.key === 'Q') {
             isMuted = !isMuted; 
             if(isMuted === false){
-                falarMensagem(`audios activated`);
+                speakMessage(`audios activated`);
             }else{
-                falarMensagem(`audios disabled`);
+                speakMessage(`audios disabled`);
             }
 
         }
