@@ -53,6 +53,7 @@ function chooseBoardPosition(valor) {
     const columns = 7;
     const board = Array.from({ length: rows + 1 }, () => Array(columns + 1).fill(0));
     const groupPieces = { 1: 'blue', 2: 'green', 3: 'purple',  4: 'red', 5: 'yellow'}; 
+    let isMuted = false; // Variável para controlar o estado de silenciamento
 
 
    
@@ -98,23 +99,31 @@ function chooseBoardPosition(valor) {
     }
     
     function playSound(moveNumber) {
-        const audio = new Audio(`../som/move${moveNumber}.wav`);
-        audio.play();
+        if (!isMuted) {
+            const audio = new Audio(`../som/move${moveNumber}.wav`);
+            audio.play();
+        }
     }
 
     function soundRuthless(){
-        const audioImpiedosa = new Audio(`../som/impiedosa.wav`);
-        audioImpiedosa.play();
+        if (!isMuted) {
+            const audioImpiedosa = new Audio(`../som/impiedosa.wav`);
+            audioImpiedosa.play();
+        }
     }
 
     function soundKillerGirl(){
-        const audioMatadora = new Audio(`../som/matadora.wav`);
-        audioMatadora.play();
+        if (!isMuted) {
+            const audioMatadora = new Audio(`../som/matadora.wav`);
+            audioMatadora.play();
+        }
     }
 
     function SoundCapture(){
-        const audioCaptura = new Audio(`../som/captura.wav`);
-        audioCaptura.play();
+        if (!isMuted) {
+            const audioCaptura = new Audio(`../som/captura.wav`);
+            audioCaptura.play();
+        }
     }
     function placepiecesatStart(groupChosen) {
         if (groupChosen === '1') {
@@ -199,6 +208,14 @@ function chooseBoardPosition(valor) {
         } else if (event.key === 'k' || event.key === 'K') {
             killerGirl = true;
             speakMessage("You have selected the killer girl. proceed with the capture.");
+        }else if (event.key === 'q' || event.key === 'Q') {
+            isMuted = !isMuted; 
+            if(isMuted === false){
+                falarMensagem(`audios activated`);
+            }else{
+                falarMensagem(`audios disabled`);
+            }
+
         }
 
         if (killerGirl && event.key.startsWith('Arrow')) {
