@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Configuração Inicial do Jogo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            margin: auto;
+            width: 50%;
+        }
+        input {
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="pageTitle">Posicione seus Mosqueteiros</h1>
+        <form id="posicoesForm" role="form" aria-labelledby="pageTitle">
+            <div>
+                <label for="peca1">Mosqueteiro 1 (Trilha 1 a 7): </label>
+                <input type="number" id="peca1" min="1" max="7" required aria-labelledby="labelPeca1">
+            </div>
+            <div>
+                <label for="peca2">Mosqueteiro 2 (Trilha 1 a 7): </label>
+                <input type="number" id="peca2" min="1" max="7" required aria-labelledby="labelPeca2">
+            </div>
+            <div>
+                <label for="peca3">Mosqueteiro 3 (Trilha 1 a 7): </label>
+                <input type="number" id="peca3" min="1" max="7" required aria-labelledby="labelPeca3">
+            </div>
+            <button type="submit" id="startButton">Começar</button>
+        </form>
+    </div>
+
+    <script>
+        // Falar as instruções assim que a página carregar
+        speak("Escolha a posição para cada mosqueteiro entre trilha 1 e 7.");
+
+        // Adicionar um pequeno atraso antes de definir o foco
+        setTimeout(function() {
+            // Definir o foco no primeiro campo de entrada
+            document.getElementById('peca1').focus();
+        }, 500);
+
+        document.getElementById('posicoesForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            for (let i = 1; i <= 3; i++) {
+                const pecaPosicao = document.getElementById(`peca${i}`).value;
+                localStorage.setItem(`posicaoPeca${i}`, pecaPosicao);
+            }
+
+            window.location.href = 'game.html'; 
+        });
+
+        // Adicionar instruções faladas para cada campo de entrada
+        document.getElementById('peca1').addEventListener('focus', function() {
+            speak("Escolha a posição do Mosqueteiro 1 entre trilha 1 e 7.");
+        });
+
+        document.getElementById('peca2').addEventListener('focus', function() {
+            speak("Escolha a posição do Mosqueteiro 2 entre trilha 1 e 7.");
+        });
+
+        document.getElementById('peca3').addEventListener('focus', function() {
+            speak("Escolha a posição do Mosqueteiro 3 entre trilha 1 e 7.");
+        });
+
+        // Adicionar eventos de entrada para navegação automática
+        document.getElementById('peca1').addEventListener('input', function() {
+            document.getElementById('peca2').focus();
+        });
+
+        document.getElementById('peca2').addEventListener('input', function() {
+            document.getElementById('peca3').focus();
+        });
+
+        document.getElementById('peca3').addEventListener('input', function() {
+            // Quando o último campo for preenchido, clicar automaticamente no botão
+            document.getElementById('startButton').click();
+        });
+
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            window.speechSynthesis.speak(utterance);
+        }
+    </script>
+</body>
+</html>

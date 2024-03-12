@@ -1,44 +1,41 @@
 <!DOCTYPE html>
-<html lang="en-GB">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3Musketeers+</title>
+    <title>3Mosqueteiros+</title>
 </head>
 <body>
-    <h3>Welcome to the world of the 3 Musketeers+.</h3>
+    <h3>Bem-vindo ao mundo dos 3 Mosqueteiros+.</h3>
 
-    <p>Turn off your screen reader. Press the esc key to stop this reading at any time. The game will start automatically.</p>
-    <p>This is a challenging game that mixes tactics and strategies. It offers the option to play against the computer or another human player.
-       3 Musketeers + requires the use of logic, tactics, strategies and predictions to position the Musketeers, capture the opponent's pieces and protect your own.
-       Good luck!</p>
+    <p>Desligue seu leitor de tela. Pressione a tecla esc para interromper esta leitura a qualquer momento. O jogo iniciará automaticamente.</p>
+    <p>Este é um jogo desafiador que mistura táticas e estratégias. Oferece a opção de jogar contra o computador ou contra outro jogador humano.
+       O 3 Mosqueteiros + requer o uso de lógica, tática, estratégias e previsões para posicionar os Mosqueteiros, capturar as peças do adversário e proteger as suas.
+       Boa sorte!</p>
 
-    <a href="pages/game.html" class="button">Join 3Musketeers+</a>
+    <a href="pages/game.html" class="button">Entrar no 3Mosqueteiros+</a>
 
     <script src="js/game.js"></script>
 
     <script>
         let synth = window.speechSynthesis;
         let utterance;
-    
+
         function lerTextoCompletoERedirecionar() {
             let texto = document.body.innerText || document.body.textContent;
             utterance = new SpeechSynthesisUtterance(texto);
-    
+
             // Ajustando a velocidade de leitura
             utterance.rate = 1.8; // Velocidade estabelecida em 1.8
-    
-            // Definindo o idioma para inglês britânico
-            utterance.lang = 'en-GB';
-    
+
             // Evento de término da leitura
             utterance.onend = function(event) {
                 window.location.href = 'pages/game.html'; // Redireciona para game.html
             };
-    
+
             synth.speak(utterance);
         }
-    
+
         // Interrompendo a leitura ao pressionar Escape e redirecionando
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
@@ -48,10 +45,9 @@
                 window.location.href = 'pages/game.html'; // Redireciona para game.html
             }
         });
-    
+
         // Executa a função de leitura quando a página é carregada
         window.onload = lerTextoCompletoERedirecionar;
     </script>
-    
 </body>
 </html>
